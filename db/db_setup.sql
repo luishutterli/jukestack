@@ -3,12 +3,15 @@
 
   Creates the schema and its relations for the jukeStack project.
 
-  Author: Luis Hutterli, 2i IMS Kantnsschule Frauenfeld
+  Author: Luis Hutterli, 2i IMS Kantonsschule Frauenfeld
   Date:   18.12.2024
 
   History:
   Version    Date         Who     Changes
   1.0        18.12.2024   LH      created
+  1.1        03.01.2025   LH      made user email unique, changed benutzerIstAdmin from tinyint to boolean
+  1.2        03.01.2025   LH      removed benutzerLetztesLogin from TBenutzer
+  1.3        03.01.2025   LH      switched from MyISAM to InnoDB, changed char length on pw hash and salt
 
   Copyright © 2024, Luis Hutterli, All rights reserved.
 -------------------------------------------------------- */
@@ -26,15 +29,14 @@ DROP TABLE IF EXISTS TBenutzer ;
 
 CREATE TABLE TBenutzer (
   benutzerId INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  benutzerEmail VARCHAR(255) NOT NULL,
+  benutzerEmail VARCHAR(255) NOT NULL UNIQUE,
   benutzerNachname VARCHAR(45) NOT NULL,
   benutzerVorname VARCHAR(45) NOT NULL,
-  benutzerPWHash CHAR(64) NOT NULL,
-  benutzerPWSalt CHAR(16) NOT NULL,
-  benutzerLetztesLogin TIMESTAMP NULL,
-  benutzerIstAdmin TINYINT NOT NULL DEFAULT 0,
+  benutzerPWHash CHAR(128) NOT NULL,
+  benutzerPWSalt CHAR(32) NOT NULL,
+  benutzerIstAdmin BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (benutzerId))
-ENGINE = MyISAM;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -51,7 +53,7 @@ CREATE TABLE TSongs (
   songMP3link VARCHAR(255) NOT NULL,
   songCoverBildLink VARCHAR(255) NULL,
   PRIMARY KEY (songId))
-ENGINE = MyISAM;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -66,7 +68,7 @@ CREATE TABLE TAusleihen (
   benutzerId INT UNSIGNED NOT NULL,
   songId INT UNSIGNED NOT NULL,
   PRIMARY KEY (ausleihId))
-ENGINE = MyISAM;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -78,7 +80,7 @@ CREATE TABLE TMusiker (
   musikerId INT UNSIGNED NOT NULL AUTO_INCREMENT,
   musikerName VARCHAR(100) NOT NULL,
   PRIMARY KEY (musikerId))
-ENGINE = MyISAM;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -89,7 +91,7 @@ DROP TABLE IF EXISTS TBeitraege ;
 CREATE TABLE TBeitraege (
   musikerId INT UNSIGNED NOT NULL,
   songId INT UNSIGNED NOT NULL)
-ENGINE = MyISAM;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -105,7 +107,7 @@ CREATE TABLE TAuthSessions (
   sessUserAgent VARCHAR(255) NOT NULL,
   benutzerId INT UNSIGNED NOT NULL,
   PRIMARY KEY (sessToken))
-ENGINE = MyISAM;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
@@ -117,4 +119,4 @@ CREATE TABLE TConfigs (
   configKey VARCHAR(45) NOT NULL,
   configValue VARCHAR(255) NOT NULL,
   PRIMARY KEY (configKey))
-ENGINE = MyISAM;
+ENGINE = InnoDB;
