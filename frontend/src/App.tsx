@@ -4,7 +4,7 @@ function App() {
 	return (
 		<div>
 			<Header />
-			<h1>JukeStack</h1>
+			<h1>App</h1>
 		</div>
 	);
 }
