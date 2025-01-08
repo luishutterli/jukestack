@@ -21,6 +21,7 @@ public class MainVerticle extends AbstractVerticle {
   private static final String API_BASE = "/api";
   private static final String USER_ROUTE = API_BASE + "/user";
   private static final String AUTH_ROUTE = API_BASE + "/auth";
+  private static final String SONGS_ROUTE = API_BASE + "/songs";
 
   private static final String VERSION = "0.1.0";
 
@@ -78,6 +79,13 @@ public class MainVerticle extends AbstractVerticle {
     router.post(AUTH_ROUTE + "/logout").handler(null); // Logout
     router.get(AUTH_ROUTE + "/verify").handler(userHandler::verify); // Verify session
     router.post(AUTH_ROUTE + "/refresh").handler(userHandler::refresh); // Refresh session
+
+    // /api/songs
+    router.get(SONGS_ROUTE).handler(null); // Get songs
+    router.get(SONGS_ROUTE + "/status/:id").handler(null); // Get song status / available ... TODO: Is this needed?
+    
+
+
 
     vertx.createHttpServer().requestHandler(router).listen(8080, http -> {
       if (http.succeeded()) {

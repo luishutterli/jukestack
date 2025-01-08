@@ -29,8 +29,8 @@ interface Song {
     id: number;
     name: string;
     dauer: number; // seconds?
-    songJahr: number;
-    songAlbum?: string;
+    jahr: number;
+    album?: string;
     musiker: Musiker[];
 }
 

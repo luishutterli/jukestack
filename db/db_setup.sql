@@ -12,6 +12,7 @@
   1.1        03.01.2025   LH      made user email unique, changed benutzerIstAdmin from tinyint to boolean
   1.2        03.01.2025   LH      removed benutzerLetztesLogin from TBenutzer
   1.3        03.01.2025   LH      switched from MyISAM to InnoDB, changed char length on pw hash and salt
+  1.4        08.01.2025   LH      switched ausleihStart from date to timestamp, fixed typo
 
   Copyright © 2024, Luis Hutterli, All rights reserved.
 -------------------------------------------------------- */
@@ -63,7 +64,7 @@ DROP TABLE IF EXISTS TAusleihen ;
 
 CREATE TABLE TAusleihen (
   ausleihId INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  ausleigStart DATE NULL,
+  ausleihStart TIMESTAMP NULL,
   ausleihTage INT NOT NULL,
   benutzerId INT UNSIGNED NOT NULL,
   songId INT UNSIGNED NOT NULL,
