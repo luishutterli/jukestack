@@ -21,8 +21,8 @@ interface User {
     email: string;
     nachname: string;
     vorname: string;
-    password?: string;
-    isAdmin?: boolean;
+    passwort?: string;
+    istAdmin?: boolean;
 }
 
 interface Song {
@@ -99,9 +99,9 @@ export async function deleteUser(): Promise<ApiResponse> {
 }
 
 // /auth
-export async function login(email: string, password: string): Promise<ApiResponse> {
+export async function login(email: string, passwort: string): Promise<ApiResponse> {
     try {
-        const response = await publicInstance.post(`${authURL}/login`, { email, password });
+        const response = await publicInstance.post(`${authURL}/login`, { email, passwort });
         return { success: response.status === 201 };
     } catch (error) {
         return handleAxiosError(error);

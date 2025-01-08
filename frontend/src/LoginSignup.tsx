@@ -2,46 +2,78 @@ import { useState } from "react";
 import Header from "./components/Header";
 import TextBox from "./components/TextBox";
 import { login, createUser } from "./util/APIWrapper";
+import { useNavigate } from "react-router";
 
 function LoginSignup() {
     const [email, setEmail] = useState("");
     const [vorname, setVorname] = useState("");
     const [nachname, setNachname] = useState("");
-    const [password, setPassword] = useState("");
+    const [passwort, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLogin, setIsLogin] = useState(true);
 
     const [message, setMessage] = useState("");
     const [isError, setIsError] = useState(false);
 
+    const [loading, setLoading] = useState(false);
+
+    const navigate = useNavigate();
+
     const toggleForm = () => {
         setIsLogin(!isLogin);
-        setConfirmPassword(""); // Reset confirm password when toggling form
+        setConfirmPassword("");
     };
 
-    const passwordsMatch = password === confirmPassword;
+    const passwordsMatch = passwort === confirmPassword;
 
-    const isFormValid = isLogin ? email && password : email && vorname && nachname && password && confirmPassword && passwordsMatch;
+    const isFormValid = isLogin ? email && passwort : email && vorname && nachname && passwort && confirmPassword && passwordsMatch;
 
-    const handleClick = () => {
+    const handleClick = async () => {
         if (!isFormValid) return;
 
+        setLoading(true);
+
         if (isLogin) {
-            login(email, password).then((response) => {
+            await login(email, passwort).then((response) => {
                 console.log(response);
                 if (!response.success) {
                     setIsError(true);
                     setMessage(`Login fehlgeschlagen: ${response.error}`);
+                    setLoading(false);
+                    return;
                 }
+                navigate("/app");
             });
+            setLoading(false);
+            return;
         }
+
+        const user = {
+            email,
+            vorname,
+            nachname,
+            passwort,
+        };
+        await createUser(user).then((response) => {
+            console.log(response);
+            if (!response.success) {
+                setMessage(`Registrierung fehlgeschlagen: ${response.error}`);
+                setIsError(true);
+                setLoading(false);
+                return;
+            }
+            setIsLogin(true);
+            setMessage("Registrierung erfolgreich!");
+            setIsError(false);
+        });
+        setLoading(false);
     };
 
     return (
         <div className="flex flex-col h-screen">
             <Header />
             <div className="flex justify-center items-center flex-grow">
-                <div className="container border-2 shadow-lg flex flex-col p-4 items-center rounded-xl w-auto">
+                <div className={`container border-2 shadow-lg flex flex-col p-4 items-center rounded-xl w-auto ${loading ? "opacity-50" : ""}`}>
                     <div>
                         <h1 className="font-extrabold text-5xl bg-gradient-to-r from-primary to-secondary to-80% inline-block text-transparent bg-clip-text p-2">
                             {isLogin ? "Login" : "Signup"}
@@ -77,7 +109,7 @@ function LoginSignup() {
                             type="password"
                             label="Password:"
                             placeholder="Dein Passwort..."
-                            value={password}
+                            value={passwort}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                         {!isLogin && (
@@ -93,8 +125,8 @@ function LoginSignup() {
                     </div>
                     <button
                         type="button"
-                        className={`p-2 rounded-lg mb-4 ${isFormValid ? "bg-primary text-white" : "bg-gray-400 text-gray-700 cursor-not-allowed"}`}
-                        disabled={!isFormValid}
+                        className={`p-2 rounded-lg mb-4 ${isFormValid && !loading ? "bg-primary text-white" : "bg-gray-400 text-gray-700 cursor-not-allowed"}`}
+                        disabled={!isFormValid || loading}
                         onClick={handleClick}>
                         {isLogin ? "Login" : "Signup"}
                     </button>

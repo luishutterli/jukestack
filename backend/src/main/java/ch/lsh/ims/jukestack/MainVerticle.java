@@ -1,12 +1,14 @@
 package ch.lsh.ims.jukestack;
 
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 
 import java.time.Duration;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.sqlclient.Pool;
@@ -49,6 +51,16 @@ public class MainVerticle extends AbstractVerticle {
     // ROUTES
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
+    // CORS configuration
+    router.route().handler(CorsHandler.create()
+        .addRelativeOrigin("http://localhost:5173")
+        .allowedMethod(HttpMethod.GET)
+        .allowedMethod(HttpMethod.POST)
+        .allowedMethod(HttpMethod.PUT)
+        .allowedMethod(HttpMethod.DELETE)
+        .allowedHeader("Content-Type")
+        .allowedHeader("Authorization")
+        .allowCredentials(true));
     router.route().handler(ctx -> {
       ctx.response().putHeader("Server", "Jukestack/" + VERSION + " (Vert.x) Server by Luis Hutterli");
       ctx.next();

@@ -32,6 +32,12 @@ public class UserHandler {
       return;
     }
 
+    // Check if email is valid
+    if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+      context.response().setStatusCode(400).end("Email not valid");
+      return;
+    }
+
     // TChecking varchar lengths
     if (email.length() > 255) {
       context.response().setStatusCode(400).end("Invalid input, email too long");
@@ -49,9 +55,16 @@ public class UserHandler {
     dbPool.preparedQuery(
         "insert into TBenutzer (benutzerEmail, benutzerNachname, benutzerVorname, benutzerPWHash, benutzerPWSalt) values (?, ?, ?, ?, ?)")
         .execute(Tuple.of(email, nachname, vorname, hashData[1], hashData[0]))
-        .onFailure(err -> {
-          context.response().setStatusCode(500).end("Internal server error");
-        })
+        .onFailure(
+            err -> dbPool.preparedQuery("select * from TBenutzer where benutzerEmail = ?").execute(Tuple.of(email))
+                .onFailure(err2 -> context.response().setStatusCode(500).end("Internal server error"))
+                .onSuccess(res -> {
+                  if (res.size() > 0) {
+                    context.response().setStatusCode(409).end("Email already in use");
+                  } else {
+                    context.response().setStatusCode(500).end("Internal server error");
+                  }
+                }))
         .onSuccess(res -> {
           context.response().setStatusCode(201).end();
         });
@@ -117,7 +130,8 @@ public class UserHandler {
     authManager.validateSession(sessionCookie)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized, " + err.getMessage()))
         .onSuccess(benutzerId -> {
-          dbPool.preparedQuery("select benutzerId, benutzerEmail, benutzerNachname, benutzerVorname from TBenutzer where benutzerId = ?")
+          dbPool.preparedQuery(
+              "select benutzerId, benutzerEmail, benutzerNachname, benutzerVorname from TBenutzer where benutzerId = ?")
               .execute(Tuple.of(benutzerId))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(res -> {
@@ -163,7 +177,9 @@ public class UserHandler {
             return;
           }
 
-          authManager.generateAndSaveSession(benutzerId.result(), context.request().remoteAddress().host(), context.request().getHeader("User-Agent"))
+          authManager
+              .generateAndSaveSession(benutzerId.result(), context.request().remoteAddress().host(),
+                  context.request().getHeader("User-Agent"))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(sessionToken -> context.response()
                   .addCookie(Cookie.cookie("session-token", sessionToken).setHttpOnly(true)
