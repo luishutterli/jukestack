@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "./components/Header";
 import TextBox from "./components/TextBox";
+import { login, createUser } from "./util/APIWrapper";
 
 function LoginSignup() {
     const [email, setEmail] = useState("");
@@ -10,6 +11,9 @@ function LoginSignup() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [isLogin, setIsLogin] = useState(true);
 
+    const [message, setMessage] = useState("");
+    const [isError, setIsError] = useState(false);
+
     const toggleForm = () => {
         setIsLogin(!isLogin);
         setConfirmPassword(""); // Reset confirm password when toggling form
@@ -17,9 +21,21 @@ function LoginSignup() {
 
     const passwordsMatch = password === confirmPassword;
 
-    const isFormValid = isLogin
-        ? email && password
-        : email && vorname && nachname && password && confirmPassword && passwordsMatch;
+    const isFormValid = isLogin ? email && password : email && vorname && nachname && password && confirmPassword && passwordsMatch;
+
+    const handleClick = () => {
+        if (!isFormValid) return;
+
+        if (isLogin) {
+            login(email, password).then((response) => {
+                console.log(response);
+                if (!response.success) {
+                    setIsError(true);
+                    setMessage(`Login fehlgeschlagen: ${response.error}`);
+                }
+            });
+        }
+    };
 
     return (
         <div className="flex flex-col h-screen">
@@ -79,12 +95,13 @@ function LoginSignup() {
                         type="button"
                         className={`p-2 rounded-lg mb-4 ${isFormValid ? "bg-primary text-white" : "bg-gray-400 text-gray-700 cursor-not-allowed"}`}
                         disabled={!isFormValid}
-                    >
+                        onClick={handleClick}>
                         {isLogin ? "Login" : "Signup"}
                     </button>
                     <button type="button" onClick={toggleForm} className="text-xs underline text-primary">
                         {isLogin ? "Noch kein Konto? Registrieren" : "Bereits ein Konto? Login"}
                     </button>
+                    {message && <p className={`text-sm mt-2 ${isError ? "text-red-500" : "text-green-500"}`}>{message}</p>}
                 </div>
             </div>
         </div>
