@@ -1,12 +1,12 @@
 import Header from "./components/Header";
 
-function App() {
+function Landing() {
 	return (
 		<div>
 			<Header />
-			<h1>App</h1>
+			<h1>Landing</h1>
 		</div>
 	);
 }
 
-export default App;
+export default Landing;
