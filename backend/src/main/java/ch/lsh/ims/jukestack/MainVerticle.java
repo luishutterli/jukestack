@@ -81,7 +81,8 @@ public class MainVerticle extends AbstractVerticle {
     router.post(AUTH_ROUTE + "/refresh").handler(userHandler::refresh); // Refresh session
 
     // /api/songs
-    router.get(SONGS_ROUTE).handler(null); // Get songs
+    SongHandler songHandler = new SongHandler(dbPool, authManager);
+    router.get(SONGS_ROUTE).handler(songHandler::listSongs); // Get songs
     router.get(SONGS_ROUTE + "/status/:id").handler(null); // Get song status / available ... TODO: Is this needed?
     
 
