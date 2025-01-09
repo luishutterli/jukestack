@@ -107,7 +107,7 @@ public class AuthenticationManager {
         .execute(Tuple.of(Util.bytesToHex(hashedSessionToken)))
         .onSuccess(res -> {
           if (res.size() == 0) {
-            promise.fail("Invalid or expired session token, " + res.toString());
+            promise.fail("Invalid or expired session token");
             return;
           }
 

@@ -5,6 +5,7 @@ import io.vertx.ext.web.handler.CorsHandler;
 
 import java.time.Duration;
 
+import ch.lsh.ims.jukestack.CloudflareR2Client.S3Config;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -22,6 +23,7 @@ public class MainVerticle extends AbstractVerticle {
   private static final String USER_ROUTE = API_BASE + "/user";
   private static final String AUTH_ROUTE = API_BASE + "/auth";
   private static final String SONGS_ROUTE = API_BASE + "/songs";
+  private static final String LEND_ROUTE = API_BASE + "/lend";
 
   private static final String VERSION = "0.1.0";
 
@@ -43,6 +45,16 @@ public class MainVerticle extends AbstractVerticle {
     PoolOptions poolOptions = new PoolOptions().setMaxSize(2);
 
     dbPool = Pool.pool(vertx, connectOptions, poolOptions);
+
+    // Cloudflare R2 Storage
+    String r2AccountId = dotenv.get("R2_ACCOUNT_ID");
+    String r2AccessKey = dotenv.get("R2_ACCESS_KEY");
+    String r2SecretKey = dotenv.get("R2_SECRET_KEY");
+
+    S3Config s3Config = new S3Config(r2AccountId, r2AccessKey, r2SecretKey);
+    CloudflareR2Client r2Client = new CloudflareR2Client(s3Config);
+
+    System.out.println("R2 Objects: " + r2Client.listObjects("juke-stack"));
 
     // Authentication Systems
     HashUtils hashUtils = new HashUtils(16, 3);
@@ -81,9 +93,15 @@ public class MainVerticle extends AbstractVerticle {
     router.post(AUTH_ROUTE + "/refresh").handler(userHandler::refresh); // Refresh session
 
     // /api/songs
-    SongHandler songHandler = new SongHandler(dbPool, authManager);
+    SongHandler songHandler = new SongHandler(dbPool, authManager, 5, 1);
     router.get(SONGS_ROUTE).handler(songHandler::listSongs); // Get songs
     router.get(SONGS_ROUTE + "/status/:id").handler(null); // Get song status / available ... TODO: Is this needed?
+
+    // /api/lend
+    router.get(LEND_ROUTE).handler(songHandler::listLendings); // Get lendings
+    router.post(LEND_ROUTE + "/:id").handler(songHandler::lendSong); // Lend song
+    router.delete(LEND_ROUTE + "/:id").handler(songHandler::returnSong); // Return song
+    router.get(LEND_ROUTE + "/:id/listen").handler(null); // Listen to song
     
 
 
