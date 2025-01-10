@@ -93,7 +93,7 @@ public class MainVerticle extends AbstractVerticle {
     router.post(AUTH_ROUTE + "/refresh").handler(userHandler::refresh); // Refresh session
 
     // /api/songs
-    SongHandler songHandler = new SongHandler(dbPool, authManager, 5, 1);
+    SongHandler songHandler = new SongHandler(dbPool, authManager, r2Client, 5, 1);
     router.get(SONGS_ROUTE).handler(songHandler::listSongs); // Get songs
     router.get(SONGS_ROUTE + "/status/:id").handler(null); // Get song status / available ... TODO: Is this needed?
 
@@ -101,7 +101,7 @@ public class MainVerticle extends AbstractVerticle {
     router.get(LEND_ROUTE).handler(songHandler::listLendings); // Get lendings
     router.post(LEND_ROUTE + "/:id").handler(songHandler::lendSong); // Lend song
     router.delete(LEND_ROUTE + "/:id").handler(songHandler::returnSong); // Return song
-    router.get(LEND_ROUTE + "/:id/listen").handler(null); // Listen to song
+    router.get(LEND_ROUTE + "/:id/listen").handler(songHandler::generateListenLink); // Listen to song
     
 
 

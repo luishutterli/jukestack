@@ -13,6 +13,7 @@
   1.2        03.01.2025   LH      removed benutzerLetztesLogin from TBenutzer
   1.3        03.01.2025   LH      switched from MyISAM to InnoDB, changed char length on pw hash and salt
   1.4        08.01.2025   LH      switched ausleihStart from date to timestamp, fixed typo
+  1.5        10.01.2025   LH      renamed to songMP3Objekt and songCoverObjekt from ... link
 
   Copyright © 2024, Luis Hutterli, All rights reserved.
 -------------------------------------------------------- */
@@ -51,8 +52,8 @@ CREATE TABLE TSongs (
   songDauer TIME NOT NULL,
   songJahr YEAR NOT NULL,
   songAlbum VARCHAR(45) NULL,
-  songMP3link VARCHAR(255) NOT NULL,
-  songCoverBildLink VARCHAR(255) NULL,
+  songMP3Objekt VARCHAR(255) NOT NULL,
+  songCoverObjekt VARCHAR(255) NULL,
   PRIMARY KEY (songId))
 ENGINE = InnoDB;
 

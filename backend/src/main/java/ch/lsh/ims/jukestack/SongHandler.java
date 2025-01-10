@@ -1,5 +1,6 @@
 package ch.lsh.ims.jukestack;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,15 @@ public class SongHandler {
 
     private final Pool dbPool;
     private final AuthenticationManager authManager;
+    private final CloudflareR2Client r2Client;
     private final int MAX_LENDINGS;
     private final int LENDING_DAYS;
 
-    public SongHandler(Pool dbPool, AuthenticationManager authManager, int maxLendings, int lendingDays) {
+    public SongHandler(Pool dbPool, AuthenticationManager authManager, CloudflareR2Client r2Client, int maxLendings,
+            int lendingDays) {
         this.dbPool = dbPool;
         this.authManager = authManager;
+        this.r2Client = r2Client;
         this.MAX_LENDINGS = maxLendings;
         this.LENDING_DAYS = lendingDays;
     }
@@ -91,6 +95,10 @@ public class SongHandler {
                         .execute(Tuple.of(benutzerId))
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(rows -> {
+                            if (rows.size() == 0) {
+                                context.response().end("[]");
+                                return;
+                            }
                             List<Integer> songIds = new ArrayList<>();
                             rows.forEach(row -> songIds.add(row.getInteger(0)));
                             String songIdsStr = String.join(",", songIds.stream().map(Object::toString).toList());
@@ -212,6 +220,38 @@ public class SongHandler {
                                 return;
                             }
                             context.response().end("OK");
+                        }));
+    }
+
+    public void generateListenLink(RoutingContext context) {
+        int songId;
+        try {
+            songId = Integer.parseInt(context.request().getParam("id"));
+        } catch (Exception e) {
+            context.response().setStatusCode(400).end("Bad Request");
+            return;
+        }
+
+        Cookie sessionCookie = context.request().getCookie("session-token");
+        authManager.validateSession(sessionCookie)
+                .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
+                .onSuccess(benutzerId -> dbPool.preparedQuery(
+                        "select * from TSongs natural join TAusleihen where songId = ? and benutzerId = ? and (ausleihStart +  interval ausleihTage DAY) >= now()")
+                        .execute(Tuple.of(songId, benutzerId))
+                        .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
+                        .onSuccess(rows -> {
+                            if (rows.size() == 0) {
+                                context.response().setStatusCode(404).end("Song not lent");
+                                return;
+                            }
+
+                            String link = r2Client.generatePresignedDownloadUrl("juke-stack",
+                                    rows.iterator().next().getString("songMP3Objekt"), Duration.ofMinutes(15));
+                            if (link == null) {
+                                context.response().setStatusCode(500).end("Internal Server Error");
+                                return;
+                            }
+                            context.response().end(link);
                         }));
     }
 
