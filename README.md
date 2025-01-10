@@ -1,6 +1,6 @@
 # Juke Stack - NFT Music Library
 IDat Schul-Projekt <br>
-&copy; 2024 Luis Hutterli
+&copy; 2025 Luis Hutterli
 
 # Running / Deploying
 ## Backend
@@ -39,4 +39,23 @@ gcloud run deploy jukestack-backend \
   --allow-unauthenticated \
   --update-secrets DB_USER=DB_USER:latest,DB_PASSWORD=DB_PASSWORD:latest, \ 
   R2_ACCOUNT_ID:R2_ACCOUNT_ID:latest,R2_ACCESS_KEY:R2_ACCESS_KEY:latest,R2_SECRET_KEY:R2_SECRET_KEY:latest
+```
+
+## Frontend
+The Frontend is a react-ts vite application and can be run with the following npm command:
+```bash
+npm run dev
+```
+
+(for this to work all dependencies need to be installed: `npm i`)
+
+### Deployment
+The Frontend first needs to be bundled:
+```bash
+npm run build
+```
+
+And from there the `frontend/dist/` folder can be deployed to firebase:
+```bash
+firebase deploy --only hosting
 ```
