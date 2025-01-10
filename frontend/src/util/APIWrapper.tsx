@@ -22,7 +22,7 @@ export interface User {
     nachname: string;
     vorname: string;
     passwort?: string;
-    istAdmin?: boolean;
+    admin?: boolean;
 }
 
 export interface Song {
@@ -40,6 +40,7 @@ export interface Musiker {
 }
 
 export interface Lend {
+    id: number;
     borrowedAt: string; // ISO date string
     returnAt: string; // ISO date string
     song: Song;
@@ -217,19 +218,20 @@ export async function adminListUserBorrowedSongs(id: number): Promise<ApiRespons
     }
 }
 
-export async function adminUpdateUserLend(id: number, lendId: number, updatedData: Partial<Lend>): Promise<ApiResponse<void>> {
+
+export async function adminUpdateUserLend(lendId: number, updatedData: {lendDays : number}): Promise<ApiResponse<void>> {
     try {
-        const response = await publicInstance.put<void>(`${adminURL}/users/${id}/lend/${lendId}`, updatedData);
+        const response = await publicInstance.put<void>(`${adminURL}/lend/${lendId}`, updatedData);
         return { success: response.status === 200 };
     } catch (error) {
         return handleAxiosError(error);
     }
 }
 
-export async function adminReturnUserLend(id: number, lendId: number): Promise<ApiResponse<void>> {
+export async function adminReturnUserLend(lendId: number): Promise<ApiResponse<void>> {
     try {
-        const response = await publicInstance.delete<void>(`${adminURL}/users/${id}/lend/${lendId}`);
-        return { success: response.status === 204 };
+        const response = await publicInstance.delete<void>(`${adminURL}/lend/${lendId}`);
+        return { success: response.status === 200 };
     } catch (error) {
         return handleAxiosError(error);
     }

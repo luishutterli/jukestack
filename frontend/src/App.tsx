@@ -30,7 +30,7 @@ function App() {
                 }
                 setUserInfo(apiResponse.data);
                 console.log("User info: ", apiResponse.data);
-                if (apiResponse.data?.istAdmin) {
+                if (apiResponse.data?.admin) {
                     navigate("/app/admin");
                 }
                 setLoading(false);
