@@ -1,10 +1,12 @@
-package ch.lsh.ims.jukestack;
+package ch.lsh.ims.jukestack.handlers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.lsh.ims.jukestack.AuthenticationManager;
+import ch.lsh.ims.jukestack.CloudflareR2Client;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -21,6 +23,7 @@ public class SongHandler {
     private final CloudflareR2Client r2Client;
     private final int MAX_LENDINGS;
     private final int LENDING_DAYS;
+    private final String SONG_BUCKET = "juke-stack";
 
     public SongHandler(Pool dbPool, AuthenticationManager authManager, CloudflareR2Client r2Client, int maxLendings,
             int lendingDays) {
@@ -35,8 +38,7 @@ public class SongHandler {
         Cookie sessionCookie = context.request().getCookie("session-token");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-                .onSuccess(benutzerId -> dbPool.preparedQuery(
-                        "with MaxAusleihen as (select songId, max(ausleihStart) ausleihStart from TAusleihen group by songId) select * from TAusleihen natural join MaxAusleihen natural right join TSongs where ausleihId is null or date_add(ausleihStart, interval ausleihTage DAY) <= now()")
+                .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.LIST_AVAILABLE_SONGS)
                         .execute()
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(rows -> {
@@ -44,9 +46,7 @@ public class SongHandler {
                             rows.forEach(row -> songIds.add(row.getInteger(0)));
                             String songIdsStr = String.join(",", songIds.stream().map(Object::toString).toList());
 
-                            dbPool.preparedQuery(
-                                    "select songId, musikerId, musikerName from TMusiker natural join TBeitraege where songId in ("
-                                            + songIdsStr + ")")
+                            dbPool.preparedQuery(SQLQueries.GET_MUSICIANS_FOR_SONGS.replace("?", songIdsStr))
                                     .execute()
                                     .onFailure(
                                             err -> context.response().setStatusCode(500).end("Internal Server Error"))
@@ -90,8 +90,7 @@ public class SongHandler {
 
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-                .onSuccess(benutzerId -> dbPool.preparedQuery(
-                        "select * from TAusleihen natural join TSongs where benutzerId = ? and date_add(ausleihStart, interval ausleihTage DAY) >= now()")
+                .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.GET_LENDINGS_FOR_USER)
                         .execute(Tuple.of(benutzerId))
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(rows -> {
@@ -103,9 +102,7 @@ public class SongHandler {
                             rows.forEach(row -> songIds.add(row.getInteger(0)));
                             String songIdsStr = String.join(",", songIds.stream().map(Object::toString).toList());
 
-                            dbPool.preparedQuery(
-                                    "select songId, musikerId, musikerName from TMusiker natural join TBeitraege where songId in ("
-                                            + songIdsStr + ")")
+                            dbPool.preparedQuery(SQLQueries.GET_MUSICIANS_FOR_SONGS.replace("?", songIdsStr))
                                     .execute()
                                     .onFailure(
                                             err -> context.response().setStatusCode(500).end("Internal Server Error"))
@@ -113,7 +110,7 @@ public class SongHandler {
                         }));
     }
 
-    private void constructLendingsJsonResponse(RoutingContext context, RowSet<Row> rows, RowSet<Row> rows2) {
+    public static void constructLendingsJsonResponse(RoutingContext context, RowSet<Row> rows, RowSet<Row> rows2) {
         JsonArray lendings = new JsonArray();
         for (Row row : rows) {
             Integer id = row.getInteger("ausleihId");
@@ -161,8 +158,7 @@ public class SongHandler {
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerId -> {
-                    dbPool.preparedQuery(
-                            "select count(*) from TAusleihen where benutzerId = ? and (ausleihStart +  interval ausleihTage DAY) >= now()")
+                    dbPool.preparedQuery(SQLQueries.COUNT_ACTIVE_LENDINGS)
                             .execute(Tuple.of(benutzerId))
                             .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                             .onSuccess(rows -> {
@@ -171,8 +167,7 @@ public class SongHandler {
                                     return;
                                 }
 
-                                dbPool.preparedQuery(
-                                        "select * from TAusleihen where songId = ? and (ausleihStart +  interval ausleihTage DAY) >= now()")
+                                dbPool.preparedQuery(SQLQueries.CHECK_SONG_LENT)
                                         .execute(Tuple.of(songId))
                                         .onFailure(err -> context.response().setStatusCode(500)
                                                 .end("Internal Server Error"))
@@ -183,9 +178,7 @@ public class SongHandler {
                                                 return;
                                             }
 
-                                            // TODO: Check if song exists
-                                            dbPool.preparedQuery(
-                                                    "insert into TAusleihen (songId, benutzerId, ausleihStart, ausleihTage) values (?, ?, now(), ?)")
+                                            dbPool.preparedQuery(SQLQueries.INSERT_LENDING)
                                                     .execute(Tuple.of(songId, benutzerId, LENDING_DAYS))
                                                     .onFailure(err -> context.response().setStatusCode(500)
                                                             .end("Internal Server Error"))
@@ -208,10 +201,7 @@ public class SongHandler {
         Cookie sessionCookie = context.request().getCookie("session-token");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-                .onSuccess(benutzerId ->
-                // TODO: This is not elegant, but it works
-                dbPool.preparedQuery(
-                        "update TAusleihen set ausleihStart = (now() - interval ausleihTage day) where songId = ? and benutzerId = ? and (ausleihStart +  interval ausleihTage DAY) >= now()")
+                .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.RETURN_SONG)
                         .execute(Tuple.of(songId, benutzerId))
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(res -> {
@@ -245,7 +235,7 @@ public class SongHandler {
                                 return;
                             }
 
-                            String link = r2Client.generatePresignedDownloadUrl("juke-stack",
+                            String link = r2Client.generatePresignedDownloadUrl(SONG_BUCKET,
                                     rows.iterator().next().getString("songMP3Objekt"), Duration.ofMinutes(15));
                             if (link == null) {
                                 context.response().setStatusCode(500).end("Internal Server Error");

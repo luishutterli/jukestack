@@ -6,6 +6,9 @@ import io.vertx.ext.web.handler.CorsHandler;
 import java.time.Duration;
 
 import ch.lsh.ims.jukestack.CloudflareR2Client.S3Config;
+import ch.lsh.ims.jukestack.handlers.AdminHandler;
+import ch.lsh.ims.jukestack.handlers.SongHandler;
+import ch.lsh.ims.jukestack.handlers.UserHandler;
 import io.github.cdimascio.dotenv.Dotenv;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -24,6 +27,7 @@ public class MainVerticle extends AbstractVerticle {
   private static final String AUTH_ROUTE = API_BASE + "/auth";
   private static final String SONGS_ROUTE = API_BASE + "/songs";
   private static final String LEND_ROUTE = API_BASE + "/lend";
+  private static final String ADMIN_ROUTE = API_BASE + "/admin";
 
   private static final String VERSION = "0.1.0";
 
@@ -95,7 +99,6 @@ public class MainVerticle extends AbstractVerticle {
     // /api/songs
     SongHandler songHandler = new SongHandler(dbPool, authManager, r2Client, 5, 1);
     router.get(SONGS_ROUTE).handler(songHandler::listSongs); // Get songs
-    router.get(SONGS_ROUTE + "/status/:id").handler(null); // Get song status / available ... TODO: Is this needed?
 
     // /api/lend
     router.get(LEND_ROUTE).handler(songHandler::listLendings); // Get lendings
@@ -103,8 +106,12 @@ public class MainVerticle extends AbstractVerticle {
     router.delete(LEND_ROUTE + "/:id").handler(songHandler::returnSong); // Return song
     router.get(LEND_ROUTE + "/:id/listen").handler(songHandler::generateListenLink); // Listen to song
     
-
-
+    // /api/admin
+    AdminHandler adminHandler = new AdminHandler(dbPool, authManager);
+    router.get(ADMIN_ROUTE + "/users").handler(adminHandler::listUsers); // Get all users
+    router.get(ADMIN_ROUTE + "/users/:id/lend").handler(adminHandler::listLentSongs); // List lent songs
+    router.put(ADMIN_ROUTE + "/lend/:lendId").handler(adminHandler::updateUserLend); // Update a lend
+    router.delete(ADMIN_ROUTE + "/lend/:lendId").handler(adminHandler::returnUserLend); // Return a lend
 
     vertx.createHttpServer().requestHandler(router).listen(8080, http -> {
       if (http.succeeded()) {

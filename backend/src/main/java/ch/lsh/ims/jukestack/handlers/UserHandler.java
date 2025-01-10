@@ -1,5 +1,7 @@
-package ch.lsh.ims.jukestack;
+package ch.lsh.ims.jukestack.handlers;
 
+import ch.lsh.ims.jukestack.AuthenticationManager;
+import ch.lsh.ims.jukestack.Util;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -32,13 +34,11 @@ public class UserHandler {
       return;
     }
 
-    // Check if email is valid
     if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
       context.response().setStatusCode(400).end("Email not valid");
       return;
     }
 
-    // TChecking varchar lengths
     if (email.length() > 255) {
       context.response().setStatusCode(400).end("Invalid input, email too long");
       return;
@@ -52,11 +52,10 @@ public class UserHandler {
 
     String[] hashData = authManager.hashPassword(passwort);
 
-    dbPool.preparedQuery(
-        "insert into TBenutzer (benutzerEmail, benutzerNachname, benutzerVorname, benutzerPWHash, benutzerPWSalt) values (?, ?, ?, ?, ?)")
+    dbPool.preparedQuery(SQLQueries.INSERT_USER)
         .execute(Tuple.of(email, nachname, vorname, hashData[1], hashData[0]))
         .onFailure(
-            err -> dbPool.preparedQuery("select * from TBenutzer where benutzerEmail = ?").execute(Tuple.of(email))
+            err -> dbPool.preparedQuery(SQLQueries.SELECT_USER_BY_EMAIL).execute(Tuple.of(email))
                 .onFailure(err2 -> context.response().setStatusCode(500).end("Internal server error"))
                 .onSuccess(res -> {
                   if (res.size() > 0) {
@@ -84,7 +83,7 @@ public class UserHandler {
       return;
     }
 
-    dbPool.preparedQuery("select benutzerId, benutzerPWHash, benutzerPWSalt from TBenutzer where benutzerEmail = ?")
+    dbPool.preparedQuery(SQLQueries.SELECT_USER_CREDENTIALS)
         .execute(Tuple.of(email))
         .onFailure(err -> {
           context.response().setStatusCode(500).end("Internal server error");
@@ -130,8 +129,7 @@ public class UserHandler {
     authManager.validateSession(sessionCookie)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized, " + err.getMessage()))
         .onSuccess(benutzerId -> {
-          dbPool.preparedQuery(
-              "select benutzerId, benutzerEmail, benutzerNachname, benutzerVorname from TBenutzer where benutzerId = ?")
+          dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_ID)
               .execute(Tuple.of(benutzerId))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(res -> {
@@ -144,7 +142,8 @@ public class UserHandler {
                     .put("id", res.iterator().next().getInteger("benutzerId"))
                     .put("email", res.iterator().next().getString("benutzerEmail"))
                     .put("nachname", res.iterator().next().getString("benutzerNachname"))
-                    .put("vorname", res.iterator().next().getString("benutzerVorname"));
+                    .put("vorname", res.iterator().next().getString("benutzerVorname"))
+                    .put("admin", res.iterator().next().getBoolean("benutzerIstAdmin"));
 
                 context.response().setStatusCode(200).end(user.encode());
               });
@@ -187,4 +186,5 @@ public class UserHandler {
                   .setStatusCode(201).end());
         });
   }
+
 }
