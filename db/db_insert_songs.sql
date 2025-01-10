@@ -28,3 +28,47 @@ insert into TSongs (songName, songDauer, songJahr, songAlbum, songMP3Objekt, son
 ('HIGHEST IN THE ROOM', '00:02:57', 2019, 'JACKBOYS', 'HIGHEST IN THE ROOM.mp3', 'HIGHEST IN THE ROOM.jpg'),
 ('Timeless', '00:04:16', 2024, 'Hurry Up Tomorrow', 'Timeless.mp3', 'Timeless.jpg');
 update TSongs set songAlbum = NULL where songAlbum = '';
+
+truncate TMusiker;
+
+insert into TMusiker (musikerName) values
+('Metro Boomin'),
+('21 Savage'),
+('Lil Tecca'),
+('VALORANT'),
+('JeanDeaux'),
+('Whipped Cream'),
+('Milano'),
+('Eddin'),
+('NEFFEX'),
+('TheFatRat'),
+('Yamê'),
+('Travis Scott'),
+('Kacy Hill'),
+('2Pac'),
+('Big Syke'),
+('Playboi Carti'),
+('the Weeknd');
+
+
+truncate TBeitraege
+
+insert into TBeitrage (musikerId, songId) values
+(select musikerId from TMusiker where musikerName = 'Metro Boomin', select songId from TSongs where songName = '10 Freaky Girls (with 21 Savage)'),
+(select musikerId from TMusiker where musikerName = '21 Savage', select songId from TSongs where songName = '10 Freaky Girls (with 21 Savage)'),
+(select musikerId from TMusiker where musikerName = 'Lil Tecca', select songId from TSongs where songName = '500lbs'),
+(select musikerId from TMusiker where musikerName = 'VALORANT', select songId from TSongs where songName = 'All Eyes On Me'),
+(select musikerId from TMusiker where musikerName = 'JeanDeaux', select songId from TSongs where songName = 'All Eyes On Me'),
+(select musikerId from TMusiker where musikerName = 'Whipped Cream', select songId from TSongs where songName = 'All Eyes On Me'),
+(select musikerId from TMusiker where musikerName = 'Milano', select songId from TSongs where songName = 'Au Revoir'),
+(select musikerId from TMusiker where musikerName = 'Eddin', select songId from TSongs where songName = 'Au Revoir'),
+(select musikerId from TMusiker where musikerName = 'NEFFEX', select songId from TSongs where songName = 'Back One Day (Outro Song)'),
+(select musikerId from TMusiker where musikerName = 'TheFatRat', select songId from TSongs where songName = 'Back One Day (Outro Song)'),
+(select musikerId from TMusiker where musikerName = 'Yamê', select songId from TSongs where songName = 'BΘcane - A COLORS SHOW'),
+(select musikerId from TMusiker where musikerName = '2Pac', select songId from TSongs where songName = 'All Eyez On Me'),
+(select musikerId from TMusiker where musikerName = 'Big Syke', select songId from TSongs where songName = 'All Eyez On Me'),
+(select musikerId from TMusiker where musikerName = 'Travis Scott', select songId from TSongs where songName = '90210'),
+(select musikerId from TMusiker where musikerName = 'Kacy Hill', select songId from TSongs where songName = '90210'),
+(select musikerId from TMusiker where musikerName = 'Travis Scott', select songId from TSongs where songName = 'HIGHEST IN THE ROOM'),
+(select musikerId from TMusiker where musikerName = 'the Weeknd', select songId from TSongs where songName = 'Timeless'),
+(select musikerId from TMusiker where musikerName = 'Playboi Carti', select songId from TSongs where songName = 'Timeless');
