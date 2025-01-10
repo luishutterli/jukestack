@@ -16,7 +16,7 @@ const publicInstance = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
-interface User {
+export interface User {
     id?: number;
     email: string;
     nachname: string;
@@ -25,7 +25,7 @@ interface User {
     istAdmin?: boolean;
 }
 
-interface Song {
+export interface Song {
     id: number;
     name: string;
     dauer: number; // seconds?
@@ -34,17 +34,15 @@ interface Song {
     musiker: Musiker[];
 }
 
-interface Musiker {
+export interface Musiker {
     id: number;
     name: string;
 }
 
-interface Lend {
-    songId: number;
-    userId: number;
+export interface Lend {
     borrowedAt: string; // ISO date string
-    dueDate: string; // ISO date string
-    song?: Song;
+    returnAt: string; // ISO date string
+    song: Song;
 }
 
 interface ApiResponse<T = unknown> {
@@ -73,7 +71,7 @@ export async function createUser(user: Omit<User, "id">): Promise<ApiResponse> {
 
 export async function getUserInfo(): Promise<ApiResponse<User>> {
     try {
-        const response = await publicInstance.get(`${userURL}/info`);
+        const response = await publicInstance.get(userURL);
         return { success: response.status === 200, data: response.data };
     } catch (error) {
         return handleAxiosError(error);
@@ -82,7 +80,7 @@ export async function getUserInfo(): Promise<ApiResponse<User>> {
 
 export async function updateUserInfo(updatedData: Partial<User>): Promise<ApiResponse> {
     try {
-        const response = await publicInstance.put(`${userURL}/info`, updatedData);
+        const response = await publicInstance.put(userURL, updatedData);
         return { success: response.status === 200 };
     } catch (error) {
         return handleAxiosError(error);
@@ -91,7 +89,7 @@ export async function updateUserInfo(updatedData: Partial<User>): Promise<ApiRes
 
 export async function deleteUser(): Promise<ApiResponse> {
     try {
-        const response = await publicInstance.delete(`${userURL}/info`);
+        const response = await publicInstance.delete(userURL);
         return { success: response.status === 204 };
     } catch (error) {
         return handleAxiosError(error);
@@ -167,16 +165,16 @@ export async function listBorrowedSongs(): Promise<ApiResponse<Lend[]>> {
 export async function lendSong(id: number): Promise<ApiResponse<void>> {
     try {
         const response = await publicInstance.post(`${lendURL}/${id}`);
-        return { success: response.status === 201 };
+        return { success: response.status === 200 };
     } catch (error) {
         return handleAxiosError(error);
     }
 }
 
-export async function returnSong(id: number): Promise<ApiResponse<void>> {
+export async function returnSong(songId: number): Promise<ApiResponse<void>> {
     try {
-        const response = await publicInstance.delete<void>(`${lendURL}/${id}`);
-        return { success: response.status === 204 };
+        const response = await publicInstance.delete<void>(`${lendURL}/${songId}`);
+        return { success: response.status === 200 };
     } catch (error) {
         return handleAxiosError(error);
     }

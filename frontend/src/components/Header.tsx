@@ -1,4 +1,6 @@
-function Header() {
+import type { User } from "../util/APIWrapper";
+
+function Header({user} : {user?: User}) {
 	return (
 		<header className="flex flex-row border-b-2 border-gray-200 items-center justify-between px-4">
 			<div className="relative flex flex-row items-end">
@@ -7,7 +9,7 @@ function Header() {
 				</h1>
 				<h2 className="ml-1 italic text-xs pb-2">NFT Music Library by Luis Hutterli</h2>
 			</div>
-			<h2>as</h2>
+			{user ? (user.email) : (<h2>as</h2>)}
 		</header>
 	);
 }

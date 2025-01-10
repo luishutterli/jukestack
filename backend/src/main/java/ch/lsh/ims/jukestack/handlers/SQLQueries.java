@@ -54,7 +54,7 @@ public final class SQLQueries {
         from TAusleihen 
         natural join MaxAusleihen 
         natural right join TSongs 
-        where ausleihId is null or date_add(ausleihStart, interval ausleihTage DAY) <= now()
+        where ausleihId is null or date_add(ausleihStart, interval ausleihTage DAY) < now()
     """;
 
     /**
@@ -79,7 +79,7 @@ public final class SQLQueries {
         from TAusleihen 
         natural join TSongs 
         where benutzerId = ? 
-        and date_add(ausleihStart, interval ausleihTage DAY) >= now()
+        and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
     /**
@@ -91,7 +91,7 @@ public final class SQLQueries {
         select count(*) 
         from TAusleihen 
         where benutzerId = ? 
-        and (ausleihStart + interval ausleihTage DAY) >= now()
+        and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
     /**
@@ -103,7 +103,7 @@ public final class SQLQueries {
         select * 
         from TAusleihen 
         where songId = ? 
-        and (ausleihStart + interval ausleihTage DAY) >= now()
+        and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
     /**
@@ -129,7 +129,7 @@ public final class SQLQueries {
         set ausleihStart = (now() - interval ausleihTage day) 
         where songId = ? 
         and benutzerId = ? 
-        and (ausleihStart + interval ausleihTage DAY) >= now()
+        and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
     /**
@@ -144,7 +144,7 @@ public final class SQLQueries {
         natural join TAusleihen 
         where songId = ? 
         and benutzerId = ? 
-        and (ausleihStart + interval ausleihTage DAY) >= now()
+        and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
 
@@ -166,7 +166,7 @@ public final class SQLQueries {
         update TAusleihen 
         set ausleihTage = ? 
         where ausleihId = ? 
-        and (ausleihStart + interval ausleihTage DAY) >= now()
+        and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
     /**
@@ -178,7 +178,7 @@ public final class SQLQueries {
         update TAusleihen 
         set ausleihStart = (now() - interval ausleihTage day) 
         where ausleihId = ? 
-        and (ausleihStart + interval ausleihTage DAY) >= now()
+        and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
 }

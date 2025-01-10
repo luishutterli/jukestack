@@ -13,6 +13,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route index element={<Landing />} />
                 <Route path="/app" element={<App />} />
                 <Route path="/app/login" element={<LoginSignup />} />
+                <Route path="/app/admin" element={ <h1>Admin</h1> } />
             </Routes>
         </BrowserRouter>
     </StrictMode>,

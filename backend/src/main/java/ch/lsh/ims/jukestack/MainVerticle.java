@@ -80,6 +80,8 @@ public class MainVerticle extends AbstractVerticle {
         .allowCredentials(true));
     router.route().handler(ctx -> {
       ctx.response().putHeader("Server", "Jukestack/" + VERSION + " (Vert.x) Server by Luis Hutterli");
+      ctx.response().putHeader("Content-Type", "application/json");
+      ctx.response().putHeader("X-Timestamp", Long.toString(System.currentTimeMillis()));
       ctx.next();
     });
 

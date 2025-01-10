@@ -14,6 +14,7 @@
   1.3        03.01.2025   LH      switched from MyISAM to InnoDB, changed char length on pw hash and salt
   1.4        08.01.2025   LH      switched ausleihStart from date to timestamp, fixed typo
   1.5        10.01.2025   LH      renamed to songMP3Objekt and songCoverObjekt from ... link
+  1.6        10.01.2025   LH      added primary key to TBeitraege
 
   Copyright © 2025, Luis Hutterli, All rights reserved.
 -------------------------------------------------------- */
@@ -92,7 +93,8 @@ DROP TABLE IF EXISTS TBeitraege ;
 
 CREATE TABLE TBeitraege (
   musikerId INT UNSIGNED NOT NULL,
-  songId INT UNSIGNED NOT NULL)
+  songId INT UNSIGNED NOT NULL,
+  PRIMARY KEY (musikerId, songId))
 ENGINE = InnoDB;
 
 

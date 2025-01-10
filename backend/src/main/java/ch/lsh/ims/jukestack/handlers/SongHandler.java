@@ -241,7 +241,9 @@ public class SongHandler {
                                 context.response().setStatusCode(500).end("Internal Server Error");
                                 return;
                             }
-                            context.response().end(link);
+                            JsonObject json = new JsonObject();
+                            json.put("link", link);
+                            context.response().end(json.encode());
                         }));
     }
 

@@ -3,6 +3,7 @@ package ch.lsh.ims.jukestack.handlers;
 import ch.lsh.ims.jukestack.AuthenticationManager;
 import ch.lsh.ims.jukestack.Util;
 import io.vertx.core.http.Cookie;
+import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.sqlclient.Pool;
@@ -114,7 +115,7 @@ public class UserHandler {
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(sessionToken -> context.response()
                   .addCookie(Cookie.cookie("session-token", sessionToken).setHttpOnly(true)
-                      .setSecure(authManager.SECURE_COOKIE).setPath("/"))
+                      .setSecure(authManager.SECURE_COOKIE).setPath("/").setSameSite(CookieSameSite.STRICT))
                   .setStatusCode(201).end());
         });
   }
