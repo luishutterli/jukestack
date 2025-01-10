@@ -17,7 +17,6 @@ export function AdminApp() {
     const [userInfo, setUserInfo] = useState<User>();
     const [loading, setLoading] = useState(true);
 
-    const [refreshKey, setRefreshKey] = useState(0);
     const [userList, setUserList] = useState<User[]>([]);
 
     useEffect(() => {
@@ -47,11 +46,11 @@ export function AdminApp() {
                     return;
                 }
                 setUserList(apiResponse.data);
-                console.log("Loaded users ", refreshKey);
+                console.log("Loaded users ");
                 setLoading(false);
             }
         });
-    }, [refreshKey]);
+    }, []);
 
     return (
         <div className="relative">
@@ -80,7 +79,6 @@ export function AdminApp() {
 }
 
 export function AdminUserLends() {
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 

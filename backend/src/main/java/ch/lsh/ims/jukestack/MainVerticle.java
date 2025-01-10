@@ -69,8 +69,10 @@ public class MainVerticle extends AbstractVerticle {
     Router router = Router.router(vertx);
     router.route().handler(BodyHandler.create());
     // CORS configuration
-    router.route().handler(CorsHandler.create()
-        .addRelativeOrigin("http://localhost:5173")
+    router.route().handler(CorsHandler.create("*")
+        // .addRelativeOrigin("http://localhost:5173")
+        // .addRelativeOrigin("https://jukestack.web.app")
+        // .addRelativeOrigin("https://jukestack.ch")
         .allowedMethod(HttpMethod.GET)
         .allowedMethod(HttpMethod.POST)
         .allowedMethod(HttpMethod.PUT)
@@ -82,6 +84,7 @@ public class MainVerticle extends AbstractVerticle {
       ctx.response().putHeader("Server", "Jukestack/" + VERSION + " (Vert.x) Server by Luis Hutterli");
       ctx.response().putHeader("Content-Type", "application/json");
       ctx.response().putHeader("X-Timestamp", Long.toString(System.currentTimeMillis()));
+      System.out.println("Vert.x Request: " + ctx.request().method() + " " + ctx.request().path());
       ctx.next();
     });
 

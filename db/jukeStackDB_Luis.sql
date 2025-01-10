@@ -1,5 +1,5 @@
 /* -----------------------------------------------------
-  db_setup.sql
+  jukeStackDB_Luis.sql
 
   Creates the schema and its relations for the jukeStack project.
 

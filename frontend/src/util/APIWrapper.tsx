@@ -1,5 +1,7 @@
-const domain = "localhost:8080";
-const baseURL = `http://${domain}/api`;
+// const domain = "localhost:8080";
+// const baseURL = `http://${domain}/api`;
+const currentDomain = window.location.hostname;
+const baseURL = `https://${currentDomain}/api`;
 
 const userURL = `${baseURL}/user`;
 const authURL = `${baseURL}/auth`;

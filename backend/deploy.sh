@@ -13,4 +13,4 @@ gcloud run deploy jukestack-backend \
   --platform managed \
   --region europe-west3 \
   --allow-unauthenticated \
-  --update-secrets DB_USER=DB_USER:latest,DB_PASSWORD=DB_PASSWORD:latest
+  --update-secrets DB_USER=DB_USER:latest,DB_PASSWORD=DB_PASSWORD:latest,R2_ACCOUNT_ID=R2_ACCOUNT_ID:latest,R2_ACCESS_KEY=R2_ACCESS_KEY:latest,R2_SECRET_KEY=R2_SECRET_KEY:latest

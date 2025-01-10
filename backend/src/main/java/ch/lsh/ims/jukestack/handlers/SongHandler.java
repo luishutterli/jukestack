@@ -84,12 +84,15 @@ public class SongHandler {
     public void listLendings(RoutingContext context) {
         Cookie sessionCookie = context.request().getCookie("session-token");
         if (sessionCookie == null) {
+            System.out.println("No session cookie provided, lend");
             context.response().setStatusCode(401).end("Unauthorized");
             return;
         }
 
         authManager.validateSession(sessionCookie)
-                .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
+                .onFailure(err ->{
+                    System.out.println("Session validation failed, lend: " + err);
+                    context.response().setStatusCode(401).end("Unauthorized");})
                 .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.GET_LENDINGS_FOR_USER)
                         .execute(Tuple.of(benutzerId))
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))

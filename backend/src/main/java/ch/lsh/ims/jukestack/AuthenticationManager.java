@@ -110,8 +110,9 @@ public class AuthenticationManager {
             promise.fail("Invalid or expired session token");
             return;
           }
-
-          promise.complete(res.iterator().next().getInteger("benutzerId"));
+          int benutzerId = res.iterator().next().getInteger("benutzerId");
+          System.out.println("Session validated for user " + benutzerId);
+          promise.complete(benutzerId);
         })
         .onFailure(err -> {
           System.err.println("Error while validating session: " + err.getMessage());

@@ -153,7 +153,7 @@ function App() {
                         <ul className="space-y-2">
                             {ownLibrary.length > 0 ? (
                                 ownLibrary.map((item) => (
-                                    <li key={item.songId}>
+                                    <li key={item.id}>
                                         <SongListCard song={item.song} lend={item} onReturn={onReturn} onPlay={onPlay} />
                                     </li>
                                 ))

@@ -54,9 +54,11 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
 
     return (
         <footer className="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-1/2 bg-gray-200 p-3 flex items-center rounded-3xl">
-            <audio ref={audioRef} src={songUrl} onTimeUpdate={handleTimeUpdate}>
-                <track kind="captions" />
-            </audio>
+            {songUrl && (
+                <audio ref={audioRef} src={songUrl} onTimeUpdate={handleTimeUpdate}>
+                    <track kind="captions" />
+                </audio>
+            )}
             <div className="w-14 h-14 bg-purple-500 rounded-2xl"></div>
 
             <div className="flex flex-1 flex-col justify-between px-4 space-y-2">
