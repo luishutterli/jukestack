@@ -51,7 +51,7 @@ public class AdminHandler {
     }
 
     public void listUsers(RoutingContext context) {
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
 
         checkAdminAccess(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized or no admin"))
@@ -77,7 +77,7 @@ public class AdminHandler {
     }
 
     public void listLentSongs(RoutingContext context) {
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
         String userId = context.request().getParam("id");
 
         checkAdminAccess(sessionCookie)
@@ -114,7 +114,7 @@ public class AdminHandler {
             return;
         }
 
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
 
         JsonObject reqBody = context.body().asJsonObject();
         if (reqBody == null) {
@@ -151,7 +151,7 @@ public class AdminHandler {
             return;
         }
 
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
 
         checkAdminAccess(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized or no admin"))

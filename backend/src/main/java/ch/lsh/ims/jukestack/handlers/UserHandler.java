@@ -114,14 +114,14 @@ public class UserHandler {
                   context.request().getHeader("User-Agent"))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(sessionToken -> context.response()
-                  .addCookie(Cookie.cookie("session-token", sessionToken).setHttpOnly(true)
+                  .addCookie(Cookie.cookie("__session", sessionToken).setHttpOnly(true)
                       .setSecure(authManager.SECURE_COOKIE).setPath("/").setSameSite(CookieSameSite.STRICT))
                   .setStatusCode(201).end());
         });
   }
 
   public void gerUserInfo(RoutingContext context) {
-    Cookie sessionCookie = context.request().getCookie("session-token");
+    Cookie sessionCookie = context.request().getCookie("__session");
     if (sessionCookie == null) {
       context.response().setStatusCode(401).end("Unauthorized");
       return;
@@ -152,7 +152,7 @@ public class UserHandler {
   }
 
   public void verify(RoutingContext context) {
-    Cookie sessionCookie = context.request().getCookie("session-token");
+    Cookie sessionCookie = context.request().getCookie("__session");
     if (sessionCookie == null) {
       context.response().setStatusCode(401).end("Unauthorized");
       return;
@@ -164,7 +164,7 @@ public class UserHandler {
   }
 
   public void refresh(RoutingContext context) {
-    Cookie sessionCookie = context.request().getCookie("session-token");
+    Cookie sessionCookie = context.request().getCookie("__session");
     if (sessionCookie == null) {
       context.response().setStatusCode(401).end("Unauthorized");
       return;
@@ -182,7 +182,7 @@ public class UserHandler {
                   context.request().getHeader("User-Agent"))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(sessionToken -> context.response()
-                  .addCookie(Cookie.cookie("session-token", sessionToken).setHttpOnly(true)
+                  .addCookie(Cookie.cookie("__session", sessionToken).setHttpOnly(true)
                       .setSecure(authManager.SECURE_COOKIE).setPath("/"))
                   .setStatusCode(201).end());
         });

@@ -13,7 +13,7 @@ import axios from "axios";
 
 const publicInstance = axios.create({
     baseURL: baseURL,
-    timeout: 2000,
+    timeout: 5000,
     withCredentials: true,
     headers: { "Content-Type": "application/json" },
 });

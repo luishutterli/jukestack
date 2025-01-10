@@ -35,7 +35,7 @@ public class SongHandler {
     }
 
     public void listSongs(RoutingContext context) {
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.LIST_AVAILABLE_SONGS)
@@ -82,7 +82,7 @@ public class SongHandler {
     }
 
     public void listLendings(RoutingContext context) {
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
         if (sessionCookie == null) {
             System.out.println("No session cookie provided, lend");
             context.response().setStatusCode(401).end("Unauthorized");
@@ -157,7 +157,7 @@ public class SongHandler {
             return;
         }
 
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerId -> {
@@ -201,7 +201,7 @@ public class SongHandler {
             return;
         }
 
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.RETURN_SONG)
@@ -225,7 +225,7 @@ public class SongHandler {
             return;
         }
 
-        Cookie sessionCookie = context.request().getCookie("session-token");
+        Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerId -> dbPool.preparedQuery(
