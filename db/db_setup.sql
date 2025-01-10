@@ -15,7 +15,7 @@
   1.4        08.01.2025   LH      switched ausleihStart from date to timestamp, fixed typo
   1.5        10.01.2025   LH      renamed to songMP3Objekt and songCoverObjekt from ... link
 
-  Copyright © 2024, Luis Hutterli, All rights reserved.
+  Copyright © 2025, Luis Hutterli, All rights reserved.
 -------------------------------------------------------- */
 
 
