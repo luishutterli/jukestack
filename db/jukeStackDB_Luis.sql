@@ -15,6 +15,8 @@
   1.4        08.01.2025   LH      switched ausleihStart from date to timestamp, fixed typo
   1.5        10.01.2025   LH      renamed to songMP3Objekt and songCoverObjekt from ... link
   1.6        10.01.2025   LH      added primary key to TBeitraege
+  1.7        16.01.2025   LH      removed synthetic primary key from TBenutzer and switched to email
+  1.8        16.01.2025   LH      switched ausleihTage to ausleihEnde
 
   Copyright © 2025, Luis Hutterli, All rights reserved.
 -------------------------------------------------------- */
@@ -31,14 +33,13 @@ USE JukeStackDB_Luis ;
 DROP TABLE IF EXISTS TBenutzer ;
 
 CREATE TABLE TBenutzer (
-  benutzerId INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  benutzerEmail VARCHAR(255) NOT NULL UNIQUE,
+  benutzerEmail VARCHAR(255) NOT NULL,
   benutzerNachname VARCHAR(45) NOT NULL,
   benutzerVorname VARCHAR(45) NOT NULL,
   benutzerPWHash CHAR(128) NOT NULL,
   benutzerPWSalt CHAR(32) NOT NULL,
   benutzerIstAdmin BOOLEAN NOT NULL DEFAULT FALSE,
-  PRIMARY KEY (benutzerId))
+  PRIMARY KEY (benutzerEmail))
 ENGINE = InnoDB;
 
 
@@ -66,9 +67,9 @@ DROP TABLE IF EXISTS TAusleihen ;
 
 CREATE TABLE TAusleihen (
   ausleihId INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  ausleihStart TIMESTAMP NULL,
-  ausleihTage INT NOT NULL,
-  benutzerId INT UNSIGNED NOT NULL,
+  ausleihStart TIMESTAMP NOT NULL,
+  ausleihEnde TIMESTAMP NOT NULL,
+  benutzerEmail VARCHAR(255) NOT NULL,
   songId INT UNSIGNED NOT NULL,
   PRIMARY KEY (ausleihId))
 ENGINE = InnoDB;
@@ -109,7 +110,7 @@ CREATE TABLE TAuthSessions (
   sessCreated TIMESTAMP NOT NULL,
   sessUserIP VARCHAR(39) NOT NULL COMMENT '39 chars max, da ipv6 eine max laenge von 32 hat + 7 chars für doppelpunkt um die bloecke zu trennen',
   sessUserAgent VARCHAR(255) NOT NULL,
-  benutzerId INT UNSIGNED NOT NULL,
+  benutzerEmail VARCHAR(255) NOT NULL,
   PRIMARY KEY (sessToken))
 ENGINE = InnoDB;
 
