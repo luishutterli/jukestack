@@ -1,7 +1,9 @@
-// const domain = "localhost:8080";
-// const baseURL = `http://${domain}/api`;
 const currentDomain = window.location.hostname;
-const baseURL = `https://${currentDomain}/api`;
+const port = currentDomain === "localhost" ? "8080" : "443";
+const baseURL = `${window.location.protocol}//${currentDomain}:${port}/api`;
+console.log(`API base url: ${baseURL}`);
+
+export const coverBaseUrl = "https://r2-images.jukestack.ch";
 
 const userURL = `${baseURL}/user`;
 const authURL = `${baseURL}/auth`;
@@ -30,7 +32,8 @@ export interface User {
 export interface Song {
     id: number;
     name: string;
-    dauer: number; // seconds?
+    dauer: number;
+    coverObjekt: string;
     jahr: number;
     album?: string;
     musiker: Musiker[];

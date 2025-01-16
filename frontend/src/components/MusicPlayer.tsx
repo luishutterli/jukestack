@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import type { Song } from "../util/APIWrapper";
+import { type Song, coverBaseUrl } from "../util/APIWrapper";
 import { formattedTime } from "../util/Util";
 
 interface MusicPlayerProps {
@@ -21,6 +21,7 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
 
     const artistsString = displayedSong.musiker.length ? `by ${displayedSong.musiker.map((artist) => artist.name).join(", ")}` : "";
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: songUrl needs to be a dependency to update the audio element
     useEffect(() => {
         if (audioRef.current) {
             if (isPlaying) {
@@ -59,8 +60,11 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
                     <track kind="captions" />
                 </audio>
             )}
-            <div className="w-14 h-14 bg-purple-500 rounded-2xl"></div>
-
+            {song ? (
+                <img src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`} alt={song.name} className="w-14 h-14 rounded-2xl" />
+            ) : (
+                <div className="w-14 h-14 bg-purple-500 rounded-2xl" />
+            )}
             <div className="flex flex-1 flex-col justify-between px-4 space-y-2">
                 <div className="flex flex-row items-center justify-between">
                     <div className="flex flex-1">

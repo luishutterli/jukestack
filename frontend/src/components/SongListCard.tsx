@@ -1,4 +1,4 @@
-import type { Lend, Song } from "../util/APIWrapper";
+import { type Lend, type Song, coverBaseUrl } from "../util/APIWrapper";
 import { formattedTime } from "../util/Util";
 
 interface SongListCardProps {
@@ -17,7 +17,7 @@ function SongListCard({ song, lend, onLend, onReturn, onPlay }: SongListCardProp
         <div className="p-2 bg-white shadow rounded-lg text-gray-700">
             <div className="flex justify-between items-center">
                 <div className="flex flex-row items-center space-x-2">
-                    <div className="w-10 h-10 bg-purple-500 rounded-md"></div>
+                    <img src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`} alt={song.name} className="w-12 h-12 rounded-md" />
                     <div>
                         <h3>
                             {song.name} - {formattedTime(song.dauer)}

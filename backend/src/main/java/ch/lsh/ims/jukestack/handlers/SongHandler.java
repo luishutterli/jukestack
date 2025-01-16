@@ -64,6 +64,7 @@ public class SongHandler {
             song.put("dauer", ((java.time.Duration) row.getValue("songDauer")).getSeconds());
             song.put("jahr", row.getInteger("songJahr"));
             song.put("album", row.getString("songAlbum"));
+            song.put("coverObjekt", row.getString("songCoverObjekt"));
 
             JsonArray musiker = new JsonArray();
             for (Row row2 : rows2) {
@@ -130,6 +131,7 @@ public class SongHandler {
             song.put("dauer", ((java.time.Duration) row.getValue("songDauer")).getSeconds());
             song.put("jahr", row.getInteger("songJahr"));
             song.put("album", row.getString("songAlbum"));
+            song.put("coverObjekt", row.getString("songCoverObjekt"));
 
             JsonArray musiker = new JsonArray();
             for (Row row2 : rows2) {
