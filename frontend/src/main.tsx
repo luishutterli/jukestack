@@ -15,7 +15,7 @@ createRoot(document.getElementById("root")!).render(
                 <Route path="/app" element={<App />} />
                 <Route path="/app/login" element={<LoginSignup />} />
                 <Route path="/app/admin" element={<AdminApp />} />
-                <Route path="/app/admin/user/:id" element={<AdminUserLends />} />
+                <Route path="/app/admin/user/:email" element={<AdminUserLends />} />
             </Routes>
         </BrowserRouter>
     </StrictMode>,

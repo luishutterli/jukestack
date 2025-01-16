@@ -120,7 +120,8 @@ public class SongHandler {
             lending.put("id", id);
             LocalDateTime ausleihStart = row.getLocalDateTime("ausleihStart");
             lending.put("borrowedAt", ausleihStart.toString());
-            lending.put("returnAt", ausleihStart.plusDays(row.getInteger("ausleihTage")).toString());
+            LocalDateTime ausleihEnde = row.getLocalDateTime("ausleihEnde");
+            lending.put("returnAt", ausleihEnde.toString());
 
             JsonObject song = new JsonObject();
             song.put("id", row.getInteger("songId"));

@@ -45,16 +45,14 @@ public final class SQLQueries {
      * @see SongHandler#listSongs(io.vertx.ext.web.RoutingContext)
      */
     public static final String LIST_AVAILABLE_SONGS = """
-        with MaxAusleihen as (
-            select songId, max(ausleihStart) ausleihStart 
-            from TAusleihen 
+        with MaxAusleihenEnde as (
+            select songId, max(ausleihEnde) ausleihEnde
+            from TAusleihen
             group by songId
-        ) 
-        select * 
-        from TAusleihen 
-        natural join MaxAusleihen 
-        natural right join TSongs 
-        where ausleihId is null or date_add(ausleihStart, interval ausleihTage DAY) < now()
+        )
+        select * from TAusleihen
+        natural join MaxAusleihenEnde natural right join TSongs
+        where ausleihId is null or ausleihEnde < now()
     """;
 
     /**
@@ -79,7 +77,7 @@ public final class SQLQueries {
         from TAusleihen 
         natural join TSongs 
         where benutzerEmail = ? 
-        and (ausleihStart + interval ausleihTage DAY) > now()
+        and ausleihEnde > now()
     """;
 
     /**
@@ -91,7 +89,7 @@ public final class SQLQueries {
         select count(*) 
         from TAusleihen 
         where benutzerEmail = ? 
-        and (ausleihStart + interval ausleihTage DAY) > now()
+        and ausleihEnde > now()
     """;
 
     /**
@@ -103,7 +101,7 @@ public final class SQLQueries {
         select * 
         from TAusleihen 
         where songId = ? 
-        and (ausleihStart + interval ausleihTage DAY) > now()
+        and ausleihEnde > now()
     """;
 
     /**
@@ -114,8 +112,8 @@ public final class SQLQueries {
      * @see SongHandler#lendSong(io.vertx.ext.web.RoutingContext)
      */
     public static final String INSERT_LENDING = """
-        insert into TAusleihen (songId, benutzerEmail, ausleihStart, ausleihTage) 
-        values (?, ?, now(), ?)
+        insert into TAusleihen (songId, benutzerEmail, ausleihStart, ausleihEnde) 
+        values (?, ?, now(), now() + interval ? day)
     """;
 
     /**
@@ -126,10 +124,10 @@ public final class SQLQueries {
      */
     public static final String RETURN_SONG = """
         update TAusleihen 
-        set ausleihStart = (now() - interval ausleihTage day) 
+        set ausleihEnde = now() - interval 1 second
         where songId = ? 
         and benutzerEmail = ? 
-        and (ausleihStart + interval ausleihTage DAY) > now()
+        and ausleihEnde > now()
     """;
 
     /**
@@ -139,7 +137,7 @@ public final class SQLQueries {
      * @see SongHandler#generateListenLink(io.vertx.ext.web.RoutingContext)
      */
     public static final String GET_LISTEN_OBJECT = """
-        select * from TSongs natural join TAusleihen where songId = ? and benutzerEmail = ? and (ausleihStart +  interval ausleihTage DAY) >= now()
+        select * from TSongs natural join TAusleihen where songId = ? and benutzerEmail = ? and ausleihEnde > now()
     """;
 
 
@@ -159,9 +157,9 @@ public final class SQLQueries {
      */
     public static final String UPDATE_LEND_DAYS_WITH_CHECK = """
         update TAusleihen 
-        set ausleihTage = ? 
+        set ausleihEnde = ausleihStart + interval ? day 
         where ausleihId = ? 
-        and (ausleihStart + interval ausleihTage DAY) > now()
+        and ausleihEnde > now()
     """;
 
     /**
@@ -171,9 +169,9 @@ public final class SQLQueries {
      */
     public static final String RETURN_SONG_ADMIN = """
         update TAusleihen 
-        set ausleihStart = (now() - interval ausleihTage day) 
+        set ausleihEnde = now() - interval 1 second
         where ausleihId = ? 
-        and (ausleihStart + interval ausleihTage DAY) > now()
+        and ausleihEnde > now()
     """;
 
 }

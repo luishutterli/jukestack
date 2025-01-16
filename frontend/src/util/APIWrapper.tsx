@@ -21,7 +21,6 @@ const publicInstance = axios.create({
 });
 
 export interface User {
-    id?: number;
     email: string;
     nachname: string;
     vorname: string;
@@ -205,18 +204,9 @@ export async function adminListAllUsers(): Promise<ApiResponse<User[]>> {
     }
 }
 
-export async function adminGetUserInfo(id: number): Promise<ApiResponse<User>> {
+export async function adminListUserBorrowedSongs(email: string): Promise<ApiResponse<Lend[]>> {
     try {
-        const response = await publicInstance.get<User>(`${adminURL}/users/${id}`);
-        return { success: response.status === 200, data: response.data };
-    } catch (error) {
-        return handleAxiosError(error);
-    }
-}
-
-export async function adminListUserBorrowedSongs(id: number): Promise<ApiResponse<Lend[]>> {
-    try {
-        const response = await publicInstance.get<Lend[]>(`${adminURL}/users/${id}/lend`);
+        const response = await publicInstance.get<Lend[]>(`${adminURL}/users/${email}/lend`);
         return { success: response.status === 200, data: response.data };
     } catch (error) {
         return handleAxiosError(error);

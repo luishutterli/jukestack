@@ -112,7 +112,7 @@ public class MainVerticle extends AbstractVerticle {
     // /api/admin
     AdminHandler adminHandler = new AdminHandler(dbPool, authManager);
     router.get(ADMIN_ROUTE + "/users").handler(adminHandler::listUsers); // Get all users
-    router.get(ADMIN_ROUTE + "/users/:id/lend").handler(adminHandler::listLentSongs); // List lent songs
+    router.get(ADMIN_ROUTE + "/users/:email/lend").handler(adminHandler::listLentSongs); // List lent songs
     router.put(ADMIN_ROUTE + "/lend/:lendId").handler(adminHandler::updateUserLend); // Update a lend
     router.delete(ADMIN_ROUTE + "/lend/:lendId").handler(adminHandler::returnUserLend); // Return a lend
 

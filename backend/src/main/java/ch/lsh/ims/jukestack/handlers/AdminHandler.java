@@ -63,7 +63,6 @@ public class AdminHandler {
                                 JsonArray users = new JsonArray();
                                 for (Row row : rows) {
                                     JsonObject user = new JsonObject();
-                                    user.put("id", row.getInteger("benutzerId"));
                                     user.put("email", row.getString("benutzerEmail"));
                                     user.put("nachname", row.getString("benutzerNachname"));
                                     user.put("vorname", row.getString("benutzerVorname"));
@@ -78,13 +77,13 @@ public class AdminHandler {
 
     public void listLentSongs(RoutingContext context) {
         Cookie sessionCookie = context.request().getCookie("__session");
-        String userId = context.request().getParam("id");
+        String userEmail = context.request().getParam("email");
 
         checkAdminAccess(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized or no admin"))
                 .onSuccess(isAdmin -> {
                     dbPool.preparedQuery(SQLQueries.GET_LENDINGS_FOR_USER)
-                            .execute(Tuple.of(Integer.valueOf(userId)))
+                            .execute(Tuple.of(userEmail))
                             .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                             .onSuccess(rows -> {
                                 if (rows.size() == 0) {

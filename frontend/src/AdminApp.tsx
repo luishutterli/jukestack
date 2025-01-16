@@ -60,15 +60,16 @@ export function AdminApp() {
                     <h1 className="text-4xl">Admin Panel</h1>
                     <div className="flex flex-col space-y-2">
                         {userList.map((user) => (
-                            <div
-                                key={user.id}
-                                className="flex flex-col border-2 border-black rounded-sm p-2 cursor-pointer"
-                                onClick={() => navigate(`/app/admin/user/${user.id}`)}>
-                                <p>ID: {user.id}</p>
+                            <button
+                                type="button"
+                                key={user.email}
+                                onClick={() => navigate(`/app/admin/user/${user.email}`)}
+                                className="flex flex-col border-2 border-black rounded-sm p-2"
+                            >
                                 <p>Email: {user.email}</p>
                                 <p>Vorname: {user.vorname}</p>
                                 <p>Nachname: {user.nachname}</p>
-                            </div>
+                            </button>
                         ))}
                     </div>
                 </div>
@@ -82,15 +83,16 @@ export function AdminUserLends() {
     const [loading, setLoading] = useState(true);
     const [refreshKey, setRefreshKey] = useState(0);
 
-    const { id } = useParams();
+    const { email } = useParams();
     const [userLends, setUserLends] = useState<Lend[]>([]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: refresh key is used to trigger a reload
     useEffect(() => {
         setLoading(true);
-        if (!id) {
+        if (!email) {
             return;
         }
-        adminListUserBorrowedSongs(Number.parseInt(id)).then((apiResponse) => {
+        adminListUserBorrowedSongs(email).then((apiResponse) => {
             if (apiResponse.success) {
                 setUserLends(apiResponse.data ?? []);
             } else {
@@ -98,11 +100,11 @@ export function AdminUserLends() {
             }
             setLoading(false);
         });
-    }, [id, refreshKey]);
+    }, [email, refreshKey]);
 
     const onReturn = async (lendId: number) => {
         setLoading(true);
-        if (!id) {
+        if (!email) {
             return;
         }
         adminReturnUserLend(lendId).then((apiResponse) => {
@@ -117,7 +119,7 @@ export function AdminUserLends() {
 
     const onUpdade = async (lendId: number) => {
         setLoading(true);
-        if (!id) {
+        if (!email) {
             return;
         }
         const newDays = Number.parseInt(prompt("Neue Ausleihdauer in Tagen eingeben") ?? "1");
@@ -139,7 +141,7 @@ export function AdminUserLends() {
         <div className="relative">
             <div className={loading ? "filter grayscale" : ""}>
                 <Header />
-                <h1 className="text-4xl m-4">Admin Panel | User ID: {id}</h1>
+                <h1 className="text-4xl m-4">Admin Panel | User ID: {email}</h1>
                 <div className="flex flex-col space-y-2">
                     {userLends.map((lend) => (
                         <div key={lend.song.id} className="flex flex-col border-2 border-black rounded-sm p-2">

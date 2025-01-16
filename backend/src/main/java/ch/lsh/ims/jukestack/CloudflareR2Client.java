@@ -49,7 +49,7 @@ public class CloudflareR2Client {
             this.accountId = accountId;
             this.accessKey = accessKey;
             this.secretKey = secretKey;
-            this.endpoint = String.format("https://%s.r2.cloudflarestorage.com", accountId);
+            this.endpoint = String.format("https://%s.r2.cloudflarestorage.com", this.accountId);
         }
 
         public String getAccessKey() {
