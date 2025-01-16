@@ -29,7 +29,7 @@ public class MainVerticle extends AbstractVerticle {
   private static final String LEND_ROUTE = API_BASE + "/lend";
   private static final String ADMIN_ROUTE = API_BASE + "/admin";
 
-  private static final String VERSION = "0.1.0";
+  private static final String VERSION = "0.1.1";
 
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
@@ -58,10 +58,8 @@ public class MainVerticle extends AbstractVerticle {
     S3Config s3Config = new S3Config(r2AccountId, r2AccessKey, r2SecretKey);
     CloudflareR2Client r2Client = new CloudflareR2Client(s3Config);
 
-    System.out.println("R2 Objects: " + r2Client.listObjects("juke-stack"));
-
     // Authentication Systems
-    HashUtils hashUtils = new HashUtils(16, 3);
+    HashUtils hashUtils = new HashUtils(16, 1);
     AuthenticationManager authManager = new AuthenticationManager(dbPool, hashUtils, 32, Duration.ofMinutes(30), false);
     // TODO: Load settings from kv store table
 
@@ -85,7 +83,6 @@ public class MainVerticle extends AbstractVerticle {
       ctx.response().putHeader("X-Server", "Jukestack/" + VERSION + " (Vert.x) Server by Luis Hutterli");
       ctx.response().putHeader("Content-Type", "application/json");
       ctx.response().putHeader("X-Timestamp", Long.toString(System.currentTimeMillis()));
-      System.out.println("Vert.x Request: " + ctx.request().method() + " " + ctx.request().path());
       ctx.next();
     });
 

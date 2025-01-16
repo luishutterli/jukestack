@@ -25,7 +25,7 @@ public final class SQLQueries {
      * @see UserHandler#login(io.vertx.ext.web.RoutingContext)
      */
     public static final String SELECT_USER_CREDENTIALS = """
-        select benutzerId, benutzerPWHash, benutzerPWSalt 
+        select benutzerPWHash, benutzerPWSalt 
         from TBenutzer 
         where benutzerEmail = ?
     """;
@@ -34,10 +34,10 @@ public final class SQLQueries {
      * SQL query to fetch user information by user ID.
      * @see UserHandler#getUserInfo(io.vertx.ext.web.RoutingContext)
      */
-    public static final String SELECT_USER_INFO_BY_ID = """
-        select benutzerId, benutzerEmail, benutzerNachname, benutzerVorname, benutzerIstAdmin 
+    public static final String SELECT_USER_INFO_BY_EMAIL = """
+        select benutzerNachname, benutzerVorname, benutzerIstAdmin 
         from TBenutzer 
-        where benutzerId = ?
+        where benutzerEmail = ?
     """;
 
     /**
@@ -71,26 +71,26 @@ public final class SQLQueries {
 
     /**
      * SQL Query to get lendings for a user
-     * @param benutzerId user ID
+     * @param benutzerEmail users mail
      * @see SongHandler#listLendings(io.vertx.ext.web.RoutingContext)
      */
     public static final String GET_LENDINGS_FOR_USER = """
         select * 
         from TAusleihen 
         natural join TSongs 
-        where benutzerId = ? 
+        where benutzerEmail = ? 
         and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
     /**
      * SQL Query to check the number of active lendings for a user
-     * @param benutzerId user ID
+     * @param benutzerEmail users mail
      * @see SongHandler#lendSong(io.vertx.ext.web.RoutingContext)
      */
     public static final String COUNT_ACTIVE_LENDINGS = """
         select count(*) 
         from TAusleihen 
-        where benutzerId = ? 
+        where benutzerEmail = ? 
         and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
@@ -109,42 +109,37 @@ public final class SQLQueries {
     /**
      * SQL Query to insert a new lending
      * @param songId song ID
-     * @param benutzerId user ID
+     * @param benutzerEmail users mail
      * @param ausleihTage number of days for the lending
      * @see SongHandler#lendSong(io.vertx.ext.web.RoutingContext)
      */
     public static final String INSERT_LENDING = """
-        insert into TAusleihen (songId, benutzerId, ausleihStart, ausleihTage) 
+        insert into TAusleihen (songId, benutzerEmail, ausleihStart, ausleihTage) 
         values (?, ?, now(), ?)
     """;
 
     /**
      * SQL Query to update a lending record to mark it as returned
      * @param songId song ID
-     * @param benutzerId user ID
+     * @param benutzerEmail users mail
      * @see SongHandler#returnSong(io.vertx.ext.web.RoutingContext)
      */
     public static final String RETURN_SONG = """
         update TAusleihen 
         set ausleihStart = (now() - interval ausleihTage day) 
         where songId = ? 
-        and benutzerId = ? 
+        and benutzerEmail = ? 
         and (ausleihStart + interval ausleihTage DAY) > now()
     """;
 
     /**
      * SQL Query to fetch details of a song and its lending status for a user
      * @param songId song ID
-     * @param benutzerId user ID
+     * @param benutzerEmail users mail
      * @see SongHandler#generateListenLink(io.vertx.ext.web.RoutingContext)
      */
-    public static final String GET_SONG_DETAILS_FOR_USER = """
-        select * 
-        from TSongs 
-        natural join TAusleihen 
-        where songId = ? 
-        and benutzerId = ? 
-        and (ausleihStart + interval ausleihTage DAY) > now()
+    public static final String GET_LISTEN_OBJECT = """
+        select * from TSongs natural join TAusleihen where songId = ? and benutzerEmail = ? and (ausleihStart +  interval ausleihTage DAY) >= now()
     """;
 
 

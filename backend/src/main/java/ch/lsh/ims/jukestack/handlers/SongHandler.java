@@ -38,7 +38,7 @@ public class SongHandler {
         Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-                .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.LIST_AVAILABLE_SONGS)
+                .onSuccess(benutzerEmail -> dbPool.preparedQuery(SQLQueries.LIST_AVAILABLE_SONGS)
                         .execute()
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(rows -> {
@@ -85,17 +85,14 @@ public class SongHandler {
     public void listLendings(RoutingContext context) {
         Cookie sessionCookie = context.request().getCookie("__session");
         if (sessionCookie == null) {
-            System.out.println("No session cookie provided, lend");
             context.response().setStatusCode(401).end("Unauthorized");
             return;
         }
 
         authManager.validateSession(sessionCookie)
-                .onFailure(err ->{
-                    System.out.println("Session validation failed, lend: " + err);
-                    context.response().setStatusCode(401).end("Unauthorized");})
-                .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.GET_LENDINGS_FOR_USER)
-                        .execute(Tuple.of(benutzerId))
+                .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
+                .onSuccess(benutzerEmail -> dbPool.preparedQuery(SQLQueries.GET_LENDINGS_FOR_USER)
+                        .execute(Tuple.of(benutzerEmail))
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(rows -> {
                             if (rows.size() == 0) {
@@ -162,9 +159,9 @@ public class SongHandler {
         Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-                .onSuccess(benutzerId -> {
+                .onSuccess(benutzerEmail -> {
                     dbPool.preparedQuery(SQLQueries.COUNT_ACTIVE_LENDINGS)
-                            .execute(Tuple.of(benutzerId))
+                            .execute(Tuple.of(benutzerEmail))
                             .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                             .onSuccess(rows -> {
                                 if (rows.iterator().next().getInteger(0) >= MAX_LENDINGS) {
@@ -184,7 +181,7 @@ public class SongHandler {
                                             }
 
                                             dbPool.preparedQuery(SQLQueries.INSERT_LENDING)
-                                                    .execute(Tuple.of(songId, benutzerId, LENDING_DAYS))
+                                                    .execute(Tuple.of(songId, benutzerEmail, LENDING_DAYS))
                                                     .onFailure(err -> context.response().setStatusCode(500)
                                                             .end("Internal Server Error"))
                                                     .onSuccess(res -> context.response().end("OK"));
@@ -206,8 +203,8 @@ public class SongHandler {
         Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-                .onSuccess(benutzerId -> dbPool.preparedQuery(SQLQueries.RETURN_SONG)
-                        .execute(Tuple.of(songId, benutzerId))
+                .onSuccess(benutzerEmail -> dbPool.preparedQuery(SQLQueries.RETURN_SONG)
+                        .execute(Tuple.of(songId, benutzerEmail))
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(res -> {
                             if (res.rowCount() == 0) {
@@ -230,9 +227,9 @@ public class SongHandler {
         Cookie sessionCookie = context.request().getCookie("__session");
         authManager.validateSession(sessionCookie)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-                .onSuccess(benutzerId -> dbPool.preparedQuery(
-                        "select * from TSongs natural join TAusleihen where songId = ? and benutzerId = ? and (ausleihStart +  interval ausleihTage DAY) >= now()")
-                        .execute(Tuple.of(songId, benutzerId))
+                .onSuccess(benutzerEmail -> dbPool.preparedQuery(
+                        SQLQueries.GET_LISTEN_OBJECT)
+                        .execute(Tuple.of(songId, benutzerEmail))
                         .onFailure(err -> context.response().setStatusCode(500).end("Internal Server Error"))
                         .onSuccess(rows -> {
                             if (rows.size() == 0) {

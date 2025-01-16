@@ -65,9 +65,7 @@ public class UserHandler {
                     context.response().setStatusCode(500).end("Internal server error");
                   }
                 }))
-        .onSuccess(res -> {
-          context.response().setStatusCode(201).end();
-        });
+        .onSuccess(res -> context.response().setStatusCode(201).end());
   }
 
   public void login(RoutingContext context) {
@@ -86,16 +84,13 @@ public class UserHandler {
 
     dbPool.preparedQuery(SQLQueries.SELECT_USER_CREDENTIALS)
         .execute(Tuple.of(email))
-        .onFailure(err -> {
-          context.response().setStatusCode(500).end("Internal server error");
-        })
+        .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
         .onSuccess(res -> {
           if (res.size() == 0) {
             context.response().setStatusCode(401).end("Invalid credentials");
             return;
           }
 
-          int benutzerId = res.iterator().next().getInteger("benutzerId");
           String benutzerPWHash_hex = res.iterator().next().getString("benutzerPWHash");
           String benutzerPWSalt_hex = res.iterator().next().getString("benutzerPWSalt");
 
@@ -110,7 +105,7 @@ public class UserHandler {
           }
 
           authManager
-              .generateAndSaveSession(benutzerId, context.request().remoteAddress().host(),
+              .generateSession(email, context.request().remoteAddress().host(),
                   context.request().getHeader("User-Agent"))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(sessionToken -> context.response()
@@ -122,16 +117,12 @@ public class UserHandler {
 
   public void gerUserInfo(RoutingContext context) {
     Cookie sessionCookie = context.request().getCookie("__session");
-    if (sessionCookie == null) {
-      context.response().setStatusCode(401).end("Unauthorized");
-      return;
-    }
 
     authManager.validateSession(sessionCookie)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized, " + err.getMessage()))
-        .onSuccess(benutzerId -> {
-          dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_ID)
-              .execute(Tuple.of(benutzerId))
+        .onSuccess(benutzerEmail -> {
+          dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_EMAIL)
+              .execute(Tuple.of(benutzerEmail))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(res -> {
                 if (res.size() == 0) {
@@ -140,8 +131,7 @@ public class UserHandler {
                 }
 
                 JsonObject user = new JsonObject()
-                    .put("id", res.iterator().next().getInteger("benutzerId"))
-                    .put("email", res.iterator().next().getString("benutzerEmail"))
+                    .put("email", benutzerEmail)
                     .put("nachname", res.iterator().next().getString("benutzerNachname"))
                     .put("vorname", res.iterator().next().getString("benutzerVorname"))
                     .put("admin", res.iterator().next().getBoolean("benutzerIstAdmin"));
@@ -153,32 +143,23 @@ public class UserHandler {
 
   public void verify(RoutingContext context) {
     Cookie sessionCookie = context.request().getCookie("__session");
-    if (sessionCookie == null) {
-      context.response().setStatusCode(401).end("Unauthorized");
-      return;
-    }
 
     authManager.validateSession(sessionCookie)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-        .onSuccess(benutzerId -> context.response().setStatusCode(200).end());
+        .onSuccess(benutzerEmail -> context.response().setStatusCode(200).end());
   }
 
   public void refresh(RoutingContext context) {
     Cookie sessionCookie = context.request().getCookie("__session");
-    if (sessionCookie == null) {
-      context.response().setStatusCode(401).end("Unauthorized");
-      return;
-    }
 
     authManager.validateSession(sessionCookie)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-        .onComplete(benutzerId -> {
-          if (benutzerId.failed()) {
+        .onComplete(benutzerEmail -> {
+          if (benutzerEmail.failed())
             return;
-          }
 
           authManager
-              .generateAndSaveSession(benutzerId.result(), context.request().remoteAddress().host(),
+              .generateSession(benutzerEmail.result(), context.request().remoteAddress().host(),
                   context.request().getHeader("User-Agent"))
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(sessionToken -> context.response()
@@ -187,5 +168,69 @@ public class UserHandler {
                   .setStatusCode(201).end());
         });
   }
+
+  // {
+  // "field": "email" | "nachname" | "vorname" | "passwort",
+  // "value": "new value"
+  // }
+  // public void updateUserInfo(RoutingContext context) {
+  // JsonObject reqBody = context.body().asJsonObject();
+  // if (reqBody == null) {
+  // context.response().setStatusCode(400).end("Invalid input");
+  // return;
+  // }
+
+  // String field = reqBody.getString("field").toLowerCase();
+  // String value = reqBody.getString("value");
+
+  // if (field == null || value == null) {
+  // context.response().setStatusCode(400).end("Invalid input");
+  // return;
+  // }
+
+  // if (!field.equals("email") && !field.equals("nachname") &&
+  // !field.equals("vorname")
+  // && !field.equals("passwort")) {
+  // context.response().setStatusCode(400).end("Invalid input");
+  // return;
+  // }
+
+  // if (field.equals("email")) {
+  // if (!value.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+  // context.response().setStatusCode(400).end("Email not valid");
+  // return;
+  // }
+
+  // if (value.length() > 255) {
+  // context.response().setStatusCode(400).end("Invalid input, email too long");
+  // return;
+  // }
+  // } else if (field.equals("nachname") && value.length() > 45) {
+  // context.response().setStatusCode(400).end("Invalid input, nachname too
+  // long");
+  // return;
+  // } else if (field.equals("vorname") && value.length() > 45) {
+  // context.response().setStatusCode(400).end("Invalid input, vorname too long");
+  // return;
+  // }
+
+  // Cookie sessionCookie = context.request().getCookie("__session");
+
+  // authManager.validateSession(sessionCookie)
+  // .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
+  // .onSuccess(benutzerId -> {
+  // if (field.equals("passwort")) {
+  // String[] hashData = authManager.hashPassword(value);
+
+  // dbPool.preparedQuery("update TBenutzer set benutzerPWHash = $1,
+  // benutzerPWSalt = $2 where benutzerEmail = $3")
+  // .execute(Tuple.of(hashData[1], hashData[0], benutzerId))
+  // .onFailure(err -> context.response().setStatusCode(500).end("Internal server
+  // error"))
+  // .onSuccess(res -> context.response().setStatusCode(200).end());
+  // } else {
+
+  // });
+  // }
 
 }

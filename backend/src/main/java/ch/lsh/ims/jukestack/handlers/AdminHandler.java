@@ -29,9 +29,9 @@ public class AdminHandler {
 
         authManager.validateSession(cookie)
                 .onFailure(promise::fail)
-                .onSuccess(benutzerId -> {
-                    dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_ID)
-                            .execute(Tuple.of(benutzerId))
+                .onSuccess(benutzerEmail -> {
+                    dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_EMAIL)
+                            .execute(Tuple.of(benutzerEmail))
                             .onFailure(promise::fail)
                             .onSuccess(res -> {
                                 if (res.size() == 0) {

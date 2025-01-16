@@ -56,14 +56,14 @@ public class AuthenticationManager {
   }
 
   /**
-   * Generates and saves a new session
+   * Generates a new session
    *
-   * @param benutzerId The ID of the user
+   * @param benutzerEmail The email of the user
    * @param userIP     The IP of the user
    * @param userAgent  The user agent of the user
    * @return The generated (unhashed) session token as a hex string, or an error message
    */
-  public Future<String> generateAndSaveSession(int benutzerId, String userIP, String userAgent) {
+  public Future<String> generateSession(String benutzerEmail, String userIP, String userAgent) {
     Promise<String> promise = Promise.promise();
 
     byte[] sessionToken = new byte[SESSION_TOKEN_LENGTH];
@@ -72,8 +72,8 @@ public class AuthenticationManager {
     byte[] sessionTokenHash = hashUtils.hashSessionToken(sessionToken);
 
     dbPool.preparedQuery(
-        "insert into TAuthSessions (benutzerId, sessToken, sessUserIp, sessUserAgent, sessCreated, sessExpires) values (?, ?, ?, ?, now(), now() + interval ? second)")
-        .execute(Tuple.of(benutzerId, Util.bytesToHex(sessionTokenHash), userIP, userAgent,
+        "insert into TAuthSessions (benutzerEmail, sessToken, sessUserIp, sessUserAgent, sessCreated, sessExpires) values (?, ?, ?, ?, now(), now() + interval ? second)")
+        .execute(Tuple.of(benutzerEmail, Util.bytesToHex(sessionTokenHash), userIP, userAgent,
             SESSION_DURATION.getSeconds()))
         .onSuccess(res -> {
           promise.complete(Util.bytesToHex(sessionToken));
@@ -90,10 +90,10 @@ public class AuthenticationManager {
    * Validates a session token
    *
    * @param sessionCookie The session token cookie
-   * @return The user ID if the session is valid, or an error message
+   * @return The users email if the session is valid, or an error message
    */
-  public Future<Integer> validateSession(Cookie sessionCookie) {
-    Promise<Integer> promise = Promise.promise();
+  public Future<String> validateSession(Cookie sessionCookie) {
+    Promise<String> promise = Promise.promise();
 
     if (sessionCookie == null || sessionCookie.getValue() == null) {
       promise.fail("No session cookie provided");
@@ -103,16 +103,14 @@ public class AuthenticationManager {
     String sessionToken = sessionCookie.getValue();
     byte[] hashedSessionToken = hashUtils.hashSessionToken(Util.hexToBytes(sessionToken));
 
-    dbPool.preparedQuery("select benutzerId from TAuthSessions where sessToken = ? and sessExpires > now()")
+    dbPool.preparedQuery("select benutzerEmail from TAuthSessions where sessToken = ? and sessExpires > now() limit 1")
         .execute(Tuple.of(Util.bytesToHex(hashedSessionToken)))
         .onSuccess(res -> {
           if (res.size() == 0) {
             promise.fail("Invalid or expired session token");
             return;
           }
-          int benutzerId = res.iterator().next().getInteger("benutzerId");
-          System.out.println("Session validated for user " + benutzerId);
-          promise.complete(benutzerId);
+          promise.complete(res.iterator().next().getString("benutzerEmail"));
         })
         .onFailure(err -> {
           System.err.println("Error while validating session: " + err.getMessage());
