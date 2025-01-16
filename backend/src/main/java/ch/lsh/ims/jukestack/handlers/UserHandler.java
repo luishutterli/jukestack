@@ -1,5 +1,7 @@
 package ch.lsh.ims.jukestack.handlers;
 
+import java.time.Duration;
+
 import ch.lsh.ims.jukestack.AuthenticationManager;
 import ch.lsh.ims.jukestack.Util;
 import io.vertx.core.http.Cookie;
@@ -13,10 +15,13 @@ public class UserHandler {
 
   private final Pool dbPool;
   private final AuthenticationManager authManager;
+  private final Duration SESSION_DURATION;
 
-  public UserHandler(Pool dbPool, AuthenticationManager authManager) {
+
+  public UserHandler(Pool dbPool, AuthenticationManager authManager, Duration sessionDuration) {
     this.dbPool = dbPool;
     this.authManager = authManager;
+    this.SESSION_DURATION = sessionDuration;
   }
 
   public void createUser(RoutingContext context) {
@@ -164,7 +169,7 @@ public class UserHandler {
               .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
               .onSuccess(sessionToken -> context.response()
                   .addCookie(Cookie.cookie("__session", sessionToken).setHttpOnly(true)
-                      .setSecure(authManager.SECURE_COOKIE).setPath("/"))
+                      .setSecure(authManager.SECURE_COOKIE).setPath("/").setMaxAge(SESSION_DURATION.getSeconds()))
                   .setStatusCode(201).end());
         });
   }

@@ -87,7 +87,7 @@ public class MainVerticle extends AbstractVerticle {
     });
 
     // /api/user
-    UserHandler userHandler = new UserHandler(dbPool, authManager);
+    UserHandler userHandler = new UserHandler(dbPool, authManager, Duration.ofMinutes(30));
     router.post(USER_ROUTE).handler(userHandler::createUser); // Create user
     router.get(USER_ROUTE).handler(userHandler::gerUserInfo); // Get user info
     router.put(USER_ROUTE).handler(null); // Update user info
