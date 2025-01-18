@@ -1,2 +1,7 @@
 */*.bak
 */*.cache
+
+/media/*/*.png
+/media/*/*.webp
+
+*/*.blend1
