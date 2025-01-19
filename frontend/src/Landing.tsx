@@ -16,10 +16,9 @@ function Landing() {
     });
 
     const images = useMemo(() => {
-        console.log("Loading images...");
         const loadImages: HTMLImageElement[] = [];
 
-        for (let i = 1; i <= 80; i++) {
+        for (let i = 1; i <= 63; i++) {
             const img = new Image();
             img.src = `/images/landingAnimation/${i}.webp`;
             loadImages.push(img);
@@ -47,12 +46,6 @@ function Landing() {
         try {
             context.clearRect(0, 0, rect.width, rect.height);
             context.drawImage(image, 0, 0, rect.width, rect.height);
-            console.log("Drew image", {
-                containerWidth: rect.width,
-                containerHeight: rect.height,
-                canvasWidth: canvas.width,
-                canvasHeight: canvas.height,
-            });
             return true;
         } catch (error) {
             console.error("Error drawing:", error);
@@ -74,7 +67,10 @@ function Landing() {
     useMotionValueEvent(scrollYProgress, "change", (latest) => {
         if (!images.length) return;
 
-        if (!canvasReady) setCanvasReady(true);
+        if (!canvasReady) {
+            setCanvasReady(true);
+            console.log("canvas ready, ", latest);
+        }
 
         if (scrollDownRef.current) {
             scrollDownRef.current.classList.add("opacity-0");
@@ -86,9 +82,9 @@ function Landing() {
     });
 
     return (
-        <div>
+        <div className="flex flex-col min-h-screen">
             <Header sticky={true} />
-            <div className="relative">
+            <div className="flex-grow relative">
                 <div ref={scrollDownRef} className="text-center font-bold text-lg">
                     ↓ Scrolle nach unten ↓
                 </div>
@@ -103,14 +99,18 @@ function Landing() {
                         }}
                     />
                 </div>
-                <div className="h-[600px] md:h-[400px] lg:h-[0px]" />
-                <div ref={scrollRef} className="h-10 " />
             </div>
+            <div style={{
+                height: `calc(100vh - ${canvasRef.current?.height}px - 6rem)`,
+            }}/>
+            <div ref={scrollRef} className="h-10" />
             <div className="py-16 px-8">
                 <div className="max-w-4xl mx-auto text-center">
                     <h2 className="text-4xl font-bold text-gray-800 mb-4">Willkommen bei JukeStack</h2>
                     <p className="text-lg text-gray-600 mb-8">
-                        JukeStack ist eine moderne, schnelle und kostenlose NFT-Musikbibliothek, in der jedes Lied nur von einem Benutzer gleichzeitig ausgeliehen werden kann. Erleben Sie die Zukunft des Musikausleihens mit unserer hochmodernen Plattform.
+                        JukeStack ist eine moderne, schnelle und kostenlose NFT-Musikbibliothek, in der jedes Lied nur von einem
+                        Benutzer gleichzeitig ausgeliehen werden kann. Erleben Sie die Zukunft des Musikausleihens mit unserer
+                        hochmodernen Plattform.
                     </p>
                     <div className="flex justify-center space-x-4">
                         <Link
@@ -129,7 +129,8 @@ function Landing() {
                         />
                         <h3 className="text-2xl font-bold text-gray-800 mb-2">Schnell und Modern</h3>
                         <p className="text-gray-600">
-                            JukeStack ist mit der neuesten Technologie ausgestattet, um ein schnelles und modernes Erlebnis zu gewährleisten. Geniessen Sie nahtloses Musikausleihen mit unserer hochmodernen Plattform.
+                            JukeStack ist mit der neuesten Technologie ausgestattet, um ein schnelles und modernes Erlebnis zu
+                            gewährleisten. Geniessen Sie nahtloses Musikausleihen mit unserer hochmodernen Plattform.
                         </p>
                     </div>
                     <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -140,7 +141,8 @@ function Landing() {
                         />
                         <h3 className="text-2xl font-bold text-gray-800 mb-2">Kostenlos</h3>
                         <p className="text-gray-600">
-                            Unsere Plattform ist völlig kostenlos. Leihen Sie Musik ohne Kosten. Treten Sie JukeStack bei und geniessen Sie Ihre Lieblingsmusik.
+                            Unsere Plattform ist völlig kostenlos. Leihen Sie Musik ohne Kosten. Treten Sie JukeStack bei und geniessen
+                            Sie Ihre Lieblingsmusik.
                         </p>
                     </div>
                 </div>
