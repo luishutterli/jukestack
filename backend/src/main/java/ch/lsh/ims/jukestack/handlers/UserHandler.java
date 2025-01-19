@@ -174,6 +174,19 @@ public class UserHandler {
         });
   }
 
+  public void logout(RoutingContext context) {
+    Cookie sessionCookie = context.request().getCookie("__session");
+
+    authManager.validateSession(sessionCookie)
+        .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
+        .onSuccess(benutzerEmail -> {
+            authManager.invalidateSession(sessionCookie);
+            context.getCookie("__session").setMaxAge(0);
+            context.response().removeCookies("__session", true);
+            context.response().setStatusCode(200).end();
+        });
+  }
+
   // {
   // "field": "email" | "nachname" | "vorname" | "passwort",
   // "value": "new value"

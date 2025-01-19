@@ -95,7 +95,7 @@ public class MainVerticle extends AbstractVerticle {
 
     // /api/auth
     router.post(AUTH_ROUTE + "/login").handler(userHandler::login); // Login
-    router.post(AUTH_ROUTE + "/logout").handler(null); // Logout
+    router.post(AUTH_ROUTE + "/logout").handler(userHandler::logout); // Logout
     router.get(AUTH_ROUTE + "/verify").handler(userHandler::verify); // Verify session
     router.post(AUTH_ROUTE + "/refresh").handler(userHandler::refresh); // Refresh session
 

@@ -114,7 +114,7 @@ export async function login(email: string, passwort: string): Promise<ApiRespons
 export async function logout(): Promise<ApiResponse> {
     try {
         const response = await publicInstance.post(`${authURL}/logout`);
-        return { success: response.status === 201 };
+        return { success: response.status === 200 };
     } catch (error) {
         return handleAxiosError(error);
     }

@@ -120,4 +120,14 @@ public class AuthenticationManager {
     return promise.future();
   }
 
+
+  public void invalidateSession(Cookie sessionCookie) {
+    String sessionToken = sessionCookie.getValue();
+    byte[] hashedSessionToken = hashUtils.hashSessionToken(Util.hexToBytes(sessionToken));
+
+    dbPool.preparedQuery("update TAuthSessions set sessExpires = now() - interval 1 second where sessToken = ?")
+        .execute(Tuple.of(Util.bytesToHex(hashedSessionToken)))
+        .onFailure(err -> System.err.println("Error while invalidating session: " + err.getMessage()));
+  }
+
 }
