@@ -1,5 +1,7 @@
 import { type Lend, type Song, coverBaseUrl } from "../util/APIWrapper";
 import { formattedTime } from "../util/Util";
+import { FaPlay } from "react-icons/fa";
+
 
 interface SongListCardProps {
     readonly song: Song;
@@ -14,7 +16,7 @@ function SongListCard({ song, lend, onLend, onReturn, onPlay }: SongListCardProp
     const artistsString = `by ${song.musiker.map((artist) => artist.name).join(", ")}`;
 
     return (
-        <div className="p-2 bg-white shadow rounded-lg text-gray-700">
+        <div className="p-2 bg-white shadow-xl rounded-lg text-gray-700 hover:shadow-2xl hover:scale-[101%] transition-all duration-150">
             <div className="flex justify-between items-center">
                 <div className="flex flex-row items-center space-x-2">
                     <img src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`} alt={song.name} className="w-12 h-12 rounded-md" />
@@ -40,8 +42,8 @@ function SongListCard({ song, lend, onLend, onReturn, onPlay }: SongListCardProp
                             onClick={() => {
                                 if (onPlay !== undefined) onPlay(song.id);
                             }}
-                            className="w-9 h-9 bg-white shadow rounded-full flex items-center justify-center">
-                            <span className="text-black">▶</span>
+                            className="w-9 h-9 bg-gray-100 shadow-md rounded-full flex items-center justify-center">
+                            <FaPlay />
                         </button>
                     )}
                     <button
@@ -50,7 +52,7 @@ function SongListCard({ song, lend, onLend, onReturn, onPlay }: SongListCardProp
                             if (isLend && onReturn !== undefined) onReturn(song.id);
                             else if (onLend !== undefined) onLend(song.id);
                         }}
-                        className={`px-2 py-1 rounded-lg ${isLend ? "bg-red-500" : "bg-green-500"} text-white font-semibold`}>
+                        className={`px-2 py-1 rounded-lg hover:shadow-lg transition-shadow duration-200 ${isLend ? "bg-red-500" : "bg-green-500"} text-white font-semibold`}>
                         {isLend ? "Zurückgeben" : "Ausleihen"}
                     </button>
                 </div>

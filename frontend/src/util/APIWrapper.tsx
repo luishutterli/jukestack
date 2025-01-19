@@ -34,7 +34,7 @@ export interface Song {
     dauer: number;
     coverObjekt: string;
     jahr: number;
-    album?: string;
+    album: string;
     musiker: Musiker[];
 }
 

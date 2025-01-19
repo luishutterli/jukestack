@@ -8,17 +8,16 @@ import SongListCard from "./components/SongListCard";
 function App() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(true);
-	const [refreshKey, setRefreshKey] = useState(0);
+    const [refreshKey, setRefreshKey] = useState(0);
 
     const [userInfo, setUserInfo] = useState<User>();
 
     const [jkLibrary, setJkLibrary] = useState<Song[]>([]);
     const [ownLibrary, setOwnLibrary] = useState<Lend[]>([]);
 
-
-	const [selectedSong , setSelectedSong] = useState<Song | null>(null);
-	const [songUrl, setSongUrl] = useState<string | null>(null);
-	const [playing, setPlaying] = useState(false);
+    const [selectedSong, setSelectedSong] = useState<Song | null>(null);
+    const [songUrl, setSongUrl] = useState<string | null>(null);
+    const [playing, setPlaying] = useState(false);
 
     useEffect(() => {
         setLoading(true);
@@ -43,7 +42,7 @@ function App() {
         listSongs().then((apiResponse) => {
             if (apiResponse.success) {
                 if (apiResponse.data === undefined) {
-					console.log("No songs ", apiResponse.error);
+                    console.log("No songs ", apiResponse.error);
                     return;
                 }
                 setJkLibrary(apiResponse.data);
@@ -58,7 +57,7 @@ function App() {
         listBorrowedSongs().then((apiResponse) => {
             if (apiResponse.success) {
                 if (apiResponse.data === undefined) {
-					console.log("No borrowed songs ", apiResponse.error);
+                    console.log("No borrowed songs ", apiResponse.error);
                     return;
                 }
                 setOwnLibrary(apiResponse.data);
@@ -75,9 +74,9 @@ function App() {
                 if (apiResponse.success) {
                     setRefreshKey(prev => prev + 1);
                 } else {
-					alert(`Song konnte nicht ausgeliehen werden: ${apiResponse.error}`);
-					setLoading(false);
-				}
+                    alert(`Song konnte nicht ausgeliehen werden: ${apiResponse.error}`);
+                    setLoading(false);
+                }
             })
             .catch(() => {
                 setLoading(false);
@@ -89,7 +88,7 @@ function App() {
         returnSong(lendId)
             .then(async (apiResponse) => {
                 if (apiResponse.success) {
-					setRefreshKey(prev => prev + 1);
+                    setRefreshKey(prev => prev + 1);
                 }
             })
             .catch(() => {
@@ -98,44 +97,44 @@ function App() {
             });
     };
 
-	const onPlay = async (songId: number) => {
-		setLoading(true);
-		generateSongFileLink(songId).then((apiResponse) => {
-			if (apiResponse.success) {
+    const onPlay = async (songId: number) => {
+        setLoading(true);
+        generateSongFileLink(songId).then((apiResponse) => {
+            if (apiResponse.success) {
                 if (!apiResponse.data || !apiResponse.data.link) {
                     console.log("No song file link");
                     setLoading(false);
                     return;
                 }
 
-				console.log("Playing song, ", songId);
-				console.log("Playing song, ", ownLibrary);
-				console.log("Playing song, ", ownLibrary.find((lend) => lend.song.id === songId));
+                console.log("Playing song, ", songId);
+                console.log("Playing song, ", ownLibrary);
+                console.log("Playing song, ", ownLibrary.find((lend) => lend.song.id === songId));
 
                 setSelectedSong(ownLibrary.find((lend) => lend.song.id === songId)?.song ?? null);
-				setSongUrl(apiResponse.data.link);
+                setSongUrl(apiResponse.data.link);
                 setPlaying(true);
-				setLoading(false);
-				console.log("Playing song, ", selectedSong);
-			} else {
-				alert(`Song konnte abgespielt werden: ${apiResponse.error}`);
-					setLoading(false);
-			}
-		}
-		).catch(() => {
-			setLoading(false);
-			console.log("Error playing song");
-		});
-	};
+                setLoading(false);
+                console.log("Playing song, ", selectedSong);
+            } else {
+                alert(`Song konnte abgespielt werden: ${apiResponse.error}`);
+                setLoading(false);
+            }
+        }
+        ).catch(() => {
+            setLoading(false);
+            console.log("Error playing song");
+        });
+    };
 
     return (
-        <div className="relative">
+        <div className="relative min-h-screen bg-gradient-to-b from-background to-blue-300">
             <div className={loading ? "filter grayscale" : ""}>
-                <Header user={userInfo}/>
-                <main className="flex flex-1">
-                    <div className="flex-1 p-4">
-                        <h2 className="text-lg font-bold mb-4">JK Bibliothek</h2>
-                        <ul className="space-y-2">
+                <Header user={userInfo} />
+                <main className="flex flex-1 p-8 space-x-8">
+                    <div className="flex-1 p-6 bg-white bg-opacity-50 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-bold mb-4"><p className="bg-gradient-to-r from-primary to-secondary to-80% inline-block text-transparent bg-clip-text">JK</p> Bibliothek</h2>
+                        <ul className="space-y-4">
                             {jkLibrary.length > 0 ? (
                                 jkLibrary.map((item) => (
                                     <li key={item.id}>
@@ -148,9 +147,9 @@ function App() {
                         </ul>
                     </div>
 
-                    <div className="flex-1 p-4 border-l">
-                        <h2 className="text-lg font-bold mb-4">Deine Bibliothek</h2>
-                        <ul className="space-y-2">
+                    <div className="flex-1 p-6 bg-white bg-opacity-50 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-bold mb-4">Deine Bibliothek</h2>
+                        <ul className="space-y-4">
                             {ownLibrary.length > 0 ? (
                                 ownLibrary.map((item) => (
                                     <li key={item.id}>
