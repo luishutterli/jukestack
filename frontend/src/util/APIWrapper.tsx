@@ -1,5 +1,5 @@
 const currentDomain = window.location.hostname;
-const port = currentDomain === "localhost" ? "8080" : "443";
+const port = window.location.protocol === "http:" ? "8080" : "443";
 const baseURL = `${window.location.protocol}//${currentDomain}:${port}/api`;
 console.log(`API base url: ${baseURL}`);
 

@@ -128,13 +128,13 @@ function App() {
     };
 
     return (
-        <div className="relative min-h-screen bg-gradient-to-b from-background to-blue-300">
+        <div className="relative min-h-screen bg-gradient-to-b from-background to-blue-300 pb-52 md:pb-0">
             <div className={loading ? "filter grayscale" : ""}>
                 <Header user={userInfo} />
-                <main className="flex flex-1 p-8 space-x-8">
-                    <div className="flex-1 p-6 bg-white bg-opacity-50 rounded-lg shadow-lg">
-                        <h2 className="text-xl font-bold mb-4"><p className="bg-gradient-to-r from-primary to-secondary to-80% inline-block text-transparent bg-clip-text">JK</p> Bibliothek</h2>
-                        <ul className="space-y-4">
+                <main className="flex flex-col md:flex-row p-2 md:p-8 space-y-4 md:space-x-8">
+                    <div className="flex-1 p-2 md:p-6 bg-white bg-opacity-50 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-bold mb-2 md:mb-4"><p className="bg-gradient-to-r from-primary to-secondary to-80% inline-block text-transparent bg-clip-text">JK</p> Bibliothek</h2>
+                        <ul className="space-y-2 md:space-y-4">
                             {jkLibrary.length > 0 ? (
                                 jkLibrary.map((item) => (
                                     <li key={item.id}>
@@ -147,9 +147,9 @@ function App() {
                         </ul>
                     </div>
 
-                    <div className="flex-1 p-6 bg-white bg-opacity-50 rounded-lg shadow-lg">
-                        <h2 className="text-xl font-bold mb-4">Deine Bibliothek</h2>
-                        <ul className="space-y-4">
+                    <div className="flex-1 p-2 md:p-6 bg-white bg-opacity-50 rounded-lg shadow-lg">
+                        <h2 className="text-xl font-bold mb-2 md:mb-4">Deine Bibliothek</h2>
+                        <ul className="space-y-2 md:space-y-4">
                             {ownLibrary.length > 0 ? (
                                 ownLibrary.map((item) => (
                                     <li key={item.id}>

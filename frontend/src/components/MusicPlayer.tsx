@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { type Song, coverBaseUrl } from "../util/APIWrapper";
 import { formattedTime } from "../util/Util";
 import { FaPause, FaPlay } from "react-icons/fa";
@@ -14,12 +14,12 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
     const audioRef = useRef<HTMLAudioElement>(null);
     const [currentTime, setCurrentTime] = useState(0);
 
-    const displayedSong = song ?? {
+    const displayedSong = useMemo(() => song ?? {
         name: "Nothing playing",
         musiker: [],
         dauer: 0,
         album: "",
-    };
+    }, [song]);
 
     const artistsString = displayedSong.musiker.length ? `by ${displayedSong.musiker.map((artist) => artist.name).join(", ")}` : "";
 
@@ -120,17 +120,17 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
                 </audio>
             )}
             {song ? (
-                <img src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`} alt={song.name} className="w-16 h-16 rounded-2xl shadow-md" />
+                <img src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`} alt={song.name} className="w-[80px] h-auto aspect-square rounded-2xl shadow-md" />
             ) : (
-                <div className="w-16 h-16 bg-purple-500 rounded-2xl shadow-md" />
+                <div className="w-[80px] h-auto aspect-square bg-purple-500 rounded-2xl shadow-md" />
             )}
             <div className="flex flex-1 flex-col justify-between px-4 space-y-2">
-                <div className="flex flex-row items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-center justify-between">
                     <div className="flex flex-1">
                         <div>
                             <p className="font-bold text-gray-800">{displayedSong.name}</p>
                             <p className="text-gray-600 text-sm">{artistsString}</p>
-                            {displayedSong.album && <p className="text-gray-600 text-sm">in {displayedSong.album}</p>}
+                            {displayedSong.album && <p className="text-gray-600 text-sm hidden md:block">in {displayedSong.album}</p>}
                         </div>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -139,7 +139,7 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
                             onClick={() => {
                                 if (song) togglePlay();
                             }}
-                            className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center shadow-md hover:scale-105 transition-transform">
+                            className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full flex items-center justify-center shadow-md">
                             {isPlaying ? <FaPause /> : <FaPlay />}
                         </button>
                         <p className="text-gray-600 text-sm">

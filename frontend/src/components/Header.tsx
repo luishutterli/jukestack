@@ -16,10 +16,10 @@ function Header({ user, sticky = false }: { readonly user?: User; readonly stick
         <header
             className={`flex flex-row border-b-2 border-gray-200 bg-background items-center justify-between px-4 ${sticky ? "sticky top-0 z-10" : ""}`}>
             <div className="relative flex flex-row items-end">
-                <h1 className="font-extrabold text-5xl bg-gradient-to-r from-primary to-secondary to-80% inline-block text-transparent bg-clip-text pb-2 pl-1">
+                <h1 className="font-extrabold text-3xl md:text-5xl bg-gradient-to-r from-primary to-secondary to-80% inline-block text-transparent bg-clip-text md:pb-2 md:pl-1">
                     JukeStack
                 </h1>
-                <h2 className="ml-1 italic text-xs pb-2">NFT Music Library by Luis Hutterli</h2>
+                <h2 className="ml-1 italic text-xs pb-2 hidden md:block">NFT Music Library by Luis Hutterli</h2>
             </div>
             {user ? (
                 <div className="relative">
