@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "jukestack",
     "public": "frontend/dist/",
     "ignore": [
       "firebase.json",
