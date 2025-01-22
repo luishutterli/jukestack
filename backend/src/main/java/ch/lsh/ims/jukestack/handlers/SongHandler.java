@@ -36,7 +36,7 @@ public class SongHandler {
 
     public void listSongs(RoutingContext context) {
         Cookie sessionCookie = context.request().getCookie("__session");
-        authManager.validateSession(sessionCookie)
+        authManager.validateSession(sessionCookie, true)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerEmail -> dbPool.preparedQuery(SQLQueries.LIST_AVAILABLE_SONGS)
                         .execute()
@@ -89,7 +89,7 @@ public class SongHandler {
             return;
         }
 
-        authManager.validateSession(sessionCookie)
+        authManager.validateSession(sessionCookie, true)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerEmail -> dbPool.preparedQuery(SQLQueries.GET_LENDINGS_FOR_USER)
                         .execute(Tuple.of(benutzerEmail))
@@ -158,7 +158,7 @@ public class SongHandler {
         }
 
         Cookie sessionCookie = context.request().getCookie("__session");
-        authManager.validateSession(sessionCookie)
+        authManager.validateSession(sessionCookie, true)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerEmail -> {
                     dbPool.preparedQuery(SQLQueries.COUNT_ACTIVE_LENDINGS)
@@ -202,7 +202,7 @@ public class SongHandler {
         }
 
         Cookie sessionCookie = context.request().getCookie("__session");
-        authManager.validateSession(sessionCookie)
+        authManager.validateSession(sessionCookie, true)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerEmail -> dbPool.preparedQuery(SQLQueries.RETURN_SONG)
                         .execute(Tuple.of(songId, benutzerEmail))
@@ -226,7 +226,7 @@ public class SongHandler {
         }
 
         Cookie sessionCookie = context.request().getCookie("__session");
-        authManager.validateSession(sessionCookie)
+        authManager.validateSession(sessionCookie, true)
                 .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
                 .onSuccess(benutzerEmail -> dbPool.preparedQuery(
                         SQLQueries.GET_LISTEN_OBJECT)

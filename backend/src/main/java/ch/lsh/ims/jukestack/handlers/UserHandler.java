@@ -120,10 +120,10 @@ public class UserHandler {
         });
   }
 
-  public void gerUserInfo(RoutingContext context) {
+  public void getUserInfo(RoutingContext context) {
     Cookie sessionCookie = context.request().getCookie("__session");
 
-    authManager.validateSession(sessionCookie)
+    authManager.validateSession(sessionCookie, false)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized, " + err.getMessage()))
         .onSuccess(benutzerEmail -> {
           dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_EMAIL)
@@ -139,17 +139,18 @@ public class UserHandler {
                     .put("email", benutzerEmail)
                     .put("nachname", res.iterator().next().getString("benutzerNachname"))
                     .put("vorname", res.iterator().next().getString("benutzerVorname"))
-                    .put("admin", res.iterator().next().getBoolean("benutzerIstAdmin"));
+                    .put("admin", res.iterator().next().getBoolean("benutzerIstAdmin"))
+                    .put("emailVerifiziert", res.iterator().next().getBoolean("benutzerEmailVerifiziert"));
 
                 context.response().setStatusCode(200).end(user.encode());
               });
         });
   }
 
-  public void verify(RoutingContext context) {
+  public void verifyToken(RoutingContext context) {
     Cookie sessionCookie = context.request().getCookie("__session");
 
-    authManager.validateSession(sessionCookie)
+    authManager.validateSession(sessionCookie, true)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
         .onSuccess(benutzerEmail -> context.response().setStatusCode(200).end());
   }
@@ -157,7 +158,7 @@ public class UserHandler {
   public void refresh(RoutingContext context) {
     Cookie sessionCookie = context.request().getCookie("__session");
 
-    authManager.validateSession(sessionCookie)
+    authManager.validateSession(sessionCookie, true)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
         .onComplete(benutzerEmail -> {
           if (benutzerEmail.failed())
@@ -177,7 +178,7 @@ public class UserHandler {
   public void logout(RoutingContext context) {
     Cookie sessionCookie = context.request().getCookie("__session");
 
-    authManager.validateSession(sessionCookie)
+    authManager.validateSession(sessionCookie, false)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
         .onSuccess(benutzerEmail -> {
             authManager.invalidateSession(sessionCookie);

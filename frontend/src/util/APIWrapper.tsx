@@ -64,6 +64,20 @@ function handleAxiosError<T = unknown>(error: unknown): ApiResponse<T> {
 }
 
 // API functions
+
+// /ping
+export async function ping(): Promise<ApiResponse> {
+    try {
+        const currentTime = Date.now();
+        const response = await publicInstance.get("/ping");
+        const responseTime = Date.now() - currentTime;
+        return { success: response.status === 200, data: responseTime };
+    } catch (error) {
+        return handleAxiosError(error);
+    }
+}
+
+
 // /user
 export async function createUser(user: Omit<User, "id">): Promise<ApiResponse> {
     try {

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Header from "./components/Header";
 import TextBox from "./components/TextBox";
-import { login, createUser } from "./util/APIWrapper";
+import { login, createUser, ping } from "./util/APIWrapper";
 import { useNavigate } from "react-router";
 
 function LoginSignup() {
@@ -23,6 +23,14 @@ function LoginSignup() {
         setIsLogin(!isLogin);
         setConfirmPassword("");
     };
+
+
+    // Ping server to wake up an instance
+    useEffect(() => {
+        ping().then((response) => {
+            console.log(`Pinged server: ${response.data}ms (roundtrip)`);
+        });
+    }, []);
 
     const passwordsMatch = passwort === confirmPassword;
 

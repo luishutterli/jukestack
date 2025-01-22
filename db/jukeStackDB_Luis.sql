@@ -17,6 +17,7 @@
   1.6        10.01.2025   LH      added primary key to TBeitraege
   1.7        16.01.2025   LH      removed synthetic primary key from TBenutzer and switched to email
   1.8        16.01.2025   LH      switched ausleihTage to ausleihEnde
+  1.9        22.01.2025   LH      created table TEmailVerifizierungen and added verified field to TBenutzer
 
   Copyright © 2025, Luis Hutterli, All rights reserved.
 -------------------------------------------------------- */
@@ -39,7 +40,21 @@ CREATE TABLE TBenutzer (
   benutzerPWHash CHAR(128) NOT NULL,
   benutzerPWSalt CHAR(32) NOT NULL,
   benutzerIstAdmin BOOLEAN NOT NULL DEFAULT FALSE,
+  benutzerEmailVerifiziert BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (benutzerEmail))
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table TEmailVerifizierungen
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS TEmailVerifizierungen ;
+
+CREATE TABLE TEmailVerifizierungen (
+  verifizierungId CHAR(32) NOT NULL,
+  benutzerEmail VARCHAR(255) NOT NULL,
+  verifizierungErstellt TIMESTAMP NOT NULL,
+  PRIMARY KEY (verifizierungId))
 ENGINE = InnoDB;
 
 

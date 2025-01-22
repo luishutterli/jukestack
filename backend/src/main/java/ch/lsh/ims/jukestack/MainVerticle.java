@@ -86,17 +86,19 @@ public class MainVerticle extends AbstractVerticle {
       ctx.next();
     });
 
+    router.get(API_BASE + "/ping").handler(ctx -> ctx.response().end("Pong!"));
+
     // /api/user
     UserHandler userHandler = new UserHandler(dbPool, authManager, Duration.ofMinutes(30));
     router.post(USER_ROUTE).handler(userHandler::createUser); // Create user
-    router.get(USER_ROUTE).handler(userHandler::gerUserInfo); // Get user info
+    router.get(USER_ROUTE).handler(userHandler::getUserInfo); // Get user info
     router.put(USER_ROUTE).handler(null); // Update user info
     router.delete(USER_ROUTE).handler(null); // Delete user
 
     // /api/auth
     router.post(AUTH_ROUTE + "/login").handler(userHandler::login); // Login
     router.post(AUTH_ROUTE + "/logout").handler(userHandler::logout); // Logout
-    router.get(AUTH_ROUTE + "/verify").handler(userHandler::verify); // Verify session
+    router.get(AUTH_ROUTE + "/verify").handler(userHandler::verifyToken); // Verify session
     router.post(AUTH_ROUTE + "/refresh").handler(userHandler::refresh); // Refresh session
 
     // /api/songs
@@ -108,7 +110,7 @@ public class MainVerticle extends AbstractVerticle {
     router.post(LEND_ROUTE + "/:id").handler(songHandler::lendSong); // Lend song
     router.delete(LEND_ROUTE + "/:id").handler(songHandler::returnSong); // Return song
     router.get(LEND_ROUTE + "/:id/listen").handler(songHandler::generateListenLink); // Listen to song
-    
+
     // /api/admin
     AdminHandler adminHandler = new AdminHandler(dbPool, authManager);
     router.get(ADMIN_ROUTE + "/users").handler(adminHandler::listUsers); // Get all users

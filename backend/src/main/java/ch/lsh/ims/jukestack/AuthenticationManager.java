@@ -92,7 +92,7 @@ public class AuthenticationManager {
    * @param sessionCookie The session token cookie
    * @return The users email if the session is valid, or an error message
    */
-  public Future<String> validateSession(Cookie sessionCookie) {
+  public Future<String> validateSession(Cookie sessionCookie, boolean checkEmailVerified) {
     Promise<String> promise = Promise.promise();
 
     if (sessionCookie == null || sessionCookie.getValue() == null) {
@@ -103,11 +103,15 @@ public class AuthenticationManager {
     String sessionToken = sessionCookie.getValue();
     byte[] hashedSessionToken = hashUtils.hashSessionToken(Util.hexToBytes(sessionToken));
 
-    dbPool.preparedQuery("select benutzerEmail from TAuthSessions where sessToken = ? and sessExpires > now() limit 1")
+    dbPool.preparedQuery("select benutzerEmail, benutzerEmailVerifiziert from TAuthSessions where sessToken = ? and sessExpires > now() limit 1")
         .execute(Tuple.of(Util.bytesToHex(hashedSessionToken)))
         .onSuccess(res -> {
           if (res.size() == 0) {
             promise.fail("Invalid or expired session token");
+            return;
+          }
+          if (checkEmailVerified && !res.iterator().next().getBoolean("benutzerEmailVerifiziert")) {
+            promise.fail("Email not verified");
             return;
           }
           promise.complete(res.iterator().next().getString("benutzerEmail"));

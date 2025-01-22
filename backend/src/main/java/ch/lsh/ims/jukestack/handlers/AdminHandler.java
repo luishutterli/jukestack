@@ -27,7 +27,7 @@ public class AdminHandler {
     private Future<Boolean> checkAdminAccess(Cookie cookie) {
         Promise<Boolean> promise = Promise.promise();
 
-        authManager.validateSession(cookie)
+        authManager.validateSession(cookie, false)
                 .onFailure(promise::fail)
                 .onSuccess(benutzerEmail -> {
                     dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_EMAIL)
