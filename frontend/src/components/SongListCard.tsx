@@ -33,7 +33,7 @@ function SongListCard({ song, lend, onLend, onReturn, onPlay }: SongListCardProp
     return (
         <div className="p-2 bg-white shadow-xl rounded-lg text-gray-700 md:hover:shadow-2xl md:hover:scale-[101%] transition-all duration-150">
             <div className="flex justify-between items-center">
-                <div className="flex flex-row justify-between flex-grow">
+                <div className="flex flex-row justify-between flex-grow mr-1">
                     <div className="flex flex-row items-center space-x-2">
                         <img
                             src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`}

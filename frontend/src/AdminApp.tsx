@@ -10,6 +10,7 @@ import {
 } from "./util/APIWrapper";
 import { Link, useNavigate, useParams } from "react-router";
 import Header from "./components/Header";
+import ErrorModal from "./components/ErrorModal";
 
 function Modal({
     isOpen,
@@ -49,8 +50,8 @@ export function AdminApp() {
 
     const [userInfo, setUserInfo] = useState<User>();
     const [loading, setLoading] = useState(true);
-
     const [userList, setUserList] = useState<User[]>([]);
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -81,6 +82,9 @@ export function AdminApp() {
                 setUserList(apiResponse.data);
                 console.log("Loaded users ");
                 setLoading(false);
+            } else {
+                setErrorMessage(`Fehler beim Laden der Benutzer: ${apiResponse.error}`);
+                setLoading(false);
             }
         });
     }, []);
@@ -109,6 +113,7 @@ export function AdminApp() {
                 </div>
                 {loading && <div className="pointer-events-none fixed inset-0 bg-white opacity-50 z-50" />}
             </div>
+            {errorMessage && <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />}
         </div>
     );
 }
@@ -120,6 +125,7 @@ export function AdminUserLends() {
     const [modalContent, setModalContent] = useState<React.ReactNode>(null);
     const [modalTitle, setModalTitle] = useState("");
     const [modalConfirmAction, setModalConfirmAction] = useState<() => void>(() => {});
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const { email } = useParams();
     const [userLends, setUserLends] = useState<Lend[]>([]);
@@ -134,7 +140,7 @@ export function AdminUserLends() {
             if (apiResponse.success) {
                 setUserLends(apiResponse.data ?? []);
             } else {
-                console.log("Error getting user lends", apiResponse.error);
+                setErrorMessage(`Fehler beim Laden der ausgeliehenen Lieder: ${apiResponse.error}`);
             }
             setLoading(false);
         });
@@ -152,7 +158,7 @@ export function AdminUserLends() {
                 if (apiResponse.success) {
                     setRefreshKey((prev) => prev + 1);
                 } else {
-                    console.log("Error returning song", apiResponse.error);
+                    setErrorMessage(`Fehler beim Zurückgeben des Liedes: ${apiResponse.error}`);
                 }
                 setLoading(false);
                 setIsModalOpen(false);
@@ -187,7 +193,7 @@ export function AdminUserLends() {
                 if (apiResponse.success) {
                     setRefreshKey((prev) => prev + 1);
                 } else {
-                    console.log("Error updating song", apiResponse.error);
+                    setErrorMessage(`Fehler beim Aktualisieren der Ausleihdauer: ${apiResponse.error}`);
                 }
                 setLoading(false);
                 setIsModalOpen(false);
@@ -263,6 +269,7 @@ export function AdminUserLends() {
                 </div>
             </div>
             {loading && <div className="pointer-events-none fixed inset-0 bg-white opacity-50 z-50" />}
+            {errorMessage && <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />}
             <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onConfirm={modalConfirmAction} title={modalTitle}>
                 {modalContent}
             </Modal>

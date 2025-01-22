@@ -59,3 +59,7 @@ And from there the `frontend/dist/` folder can be deployed to firebase:
 ```bash
 firebase deploy --only hosting
 ```
+
+# Caching
+The cover images are cached client-side using the `Cache-Control` header. The cache is set to 1 month. <br>
+The header is set using a custom Cloudflare Caching rule which caches everything matching this pattern: `https://r2-images.jukestack.ch/*`

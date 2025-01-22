@@ -120,7 +120,7 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
                 </audio>
             )}
             {song ? (
-                <img src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`} alt={song.name} className="w-[80px] h-auto aspect-square rounded-2xl shadow-md" />
+                <img src={`${coverBaseUrl}/${encodeURIComponent(song.coverObjekt)}`} alt={song.name} className="w-[80px] h-auto aspect-square rounded-2xl shadow-md hover:scale-105 hover:shadow-lg transition-all duration-150" />
             ) : (
                 <div className="w-[80px] h-auto aspect-square bg-purple-500 rounded-2xl shadow-md" />
             )}
@@ -154,7 +154,7 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
                     max={displayedSong.dauer}
                     value={currentTime}
                     onChange={handleSeek}
-                    className="w-full h-2 rounded-full appearance-none bg-gray-300"
+                    className="w-full h-2 rounded-full bg-gray-300"
                 />
             </div>
         </footer>

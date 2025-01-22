@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { generateSongFileLink, getUserInfo, lendSong, listBorrowedSongs, listSongs, returnSong, type Lend, type Song, type User } from "./util/APIWrapper";
 import MusicPlayer from "./components/MusicPlayer";
 import SongListCard from "./components/SongListCard";
+import ErrorModal from "./components/ErrorModal";
 
 function App() {
     const navigate = useNavigate();
@@ -18,6 +19,8 @@ function App() {
     const [selectedSong, setSelectedSong] = useState<Song | null>(null);
     const [songUrl, setSongUrl] = useState<string | null>(null);
     const [playing, setPlaying] = useState(false);
+
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -74,11 +77,12 @@ function App() {
                 if (apiResponse.success) {
                     setRefreshKey(prev => prev + 1);
                 } else {
-                    alert(`Song konnte nicht ausgeliehen werden: ${apiResponse.error}`);
+                    setErrorMessage(`Song konnte nicht ausgeliehen werden: ${apiResponse.error}`);
                     setLoading(false);
                 }
             })
             .catch(() => {
+                setErrorMessage("Error lending song");
                 setLoading(false);
             });
     };
@@ -89,11 +93,14 @@ function App() {
             .then(async (apiResponse) => {
                 if (apiResponse.success) {
                     setRefreshKey(prev => prev + 1);
+                } else {
+                    setErrorMessage(`Song konnte nicht zurückgegeben werden: ${apiResponse.error}`);
+                    setLoading(false);
                 }
             })
             .catch(() => {
+                setErrorMessage("Error returning song");
                 setLoading(false);
-                console.log("Error returning song");
             });
     };
 
@@ -117,13 +124,13 @@ function App() {
                 setLoading(false);
                 console.log("Playing song, ", selectedSong);
             } else {
-                alert(`Song konnte abgespielt werden: ${apiResponse.error}`);
+                setErrorMessage(`Song konnte nicht abgespielt werden: ${apiResponse.error}`);
                 setLoading(false);
             }
         }
         ).catch(() => {
+            setErrorMessage("Error playing song");
             setLoading(false);
-            console.log("Error playing song");
         });
     };
 
@@ -166,6 +173,7 @@ function App() {
             </div>
 
             {loading && <div className="pointer-events-none fixed inset-0 bg-white opacity-50 z-50" />}
+            {errorMessage && <ErrorModal message={errorMessage} onClose={() => setErrorMessage(null)} />}
         </div>
     );
 }
