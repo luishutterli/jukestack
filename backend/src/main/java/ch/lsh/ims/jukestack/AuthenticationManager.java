@@ -18,7 +18,8 @@ public class AuthenticationManager {
   private final Duration SESSION_DURATION;
   public final boolean SECURE_COOKIE;
 
-  public AuthenticationManager(Pool dbPool, HashUtils hashUtils, int sessionTokenLength, Duration sessionDuration, boolean secureCookie) {
+  public AuthenticationManager(Pool dbPool, HashUtils hashUtils, int sessionTokenLength, Duration sessionDuration,
+      boolean secureCookie) {
     this.dbPool = dbPool;
     this.hashUtils = hashUtils;
     this.SESSION_TOKEN_LENGTH = sessionTokenLength;
@@ -59,9 +60,10 @@ public class AuthenticationManager {
    * Generates a new session
    *
    * @param benutzerEmail The email of the user
-   * @param userIP     The IP of the user
-   * @param userAgent  The user agent of the user
-   * @return The generated (unhashed) session token as a hex string, or an error message
+   * @param userIP        The IP of the user
+   * @param userAgent     The user agent of the user
+   * @return The generated (unhashed) session token as a hex string, or an error
+   *         message
    */
   public Future<String> generateSession(String benutzerEmail, String userIP, String userAgent) {
     Promise<String> promise = Promise.promise();
@@ -103,7 +105,8 @@ public class AuthenticationManager {
     String sessionToken = sessionCookie.getValue();
     byte[] hashedSessionToken = hashUtils.hashSessionToken(Util.hexToBytes(sessionToken));
 
-    dbPool.preparedQuery("select benutzerEmail, benutzerEmailVerifiziert from TAuthSessions where sessToken = ? and sessExpires > now() limit 1")
+    dbPool.preparedQuery(
+        "select benutzerEmail, benutzerEmailVerifiziert from TAuthSessions natural join TBenutzer where sessToken = ? and sessExpires > now() limit 1")
         .execute(Tuple.of(Util.bytesToHex(hashedSessionToken)))
         .onSuccess(res -> {
           if (res.size() == 0) {
@@ -124,6 +127,69 @@ public class AuthenticationManager {
     return promise.future();
   }
 
+  /**
+   * Generates a new email verification token
+   *
+   * @param benutzerEmail The email of the user
+   * @return The generated email verification token as a hex string, or
+   *         an error message
+   */
+  public Future<String> generateAndSaveEmailVerifyToken(String benutzerEmail) {
+    Promise<String> promise = Promise.promise();
+
+    byte[] verifyToken = new byte[16];
+    new SecureRandom().nextBytes(verifyToken);
+    String verifyTokenStr = Util.bytesToHex(verifyToken);
+
+    dbPool.preparedQuery(
+        "insert into TEmailVerifizierungen (benutzerEmail, verifizierungId, verifizierungErstellt) values (?, ?, now())")
+        .execute(Tuple.of(benutzerEmail, verifyTokenStr))
+        .onSuccess(res -> {
+          promise.complete(verifyTokenStr);
+        })
+        .onFailure(err -> {
+          System.err.println("Error while generating email verify token: " + err.getMessage());
+          promise.fail(err);
+        });
+
+    return promise.future();
+  }
+
+  public Future<Boolean> verifyEmail(String verifyToken) {
+    Promise<Boolean> promise = Promise.promise();
+
+    dbPool.preparedQuery(
+        "select benutzerEmail from TEmailVerifizierungen where verifizierungId = ? and verifizierungErstellt > now() - interval 1 day")
+        .execute(Tuple.of(verifyToken))
+        .onSuccess(res -> {
+          if (res.size() == 0) {
+            promise.complete(false);
+            return;
+          }
+
+          String benutzerEmail = res.iterator().next().getString("benutzerEmail");
+
+          dbPool.preparedQuery("update TBenutzer set benutzerEmailVerifiziert = true where benutzerEmail = ?")
+              .execute(Tuple.of(benutzerEmail))
+              .onSuccess(res2 -> {
+                if (res2.rowCount() == 0) {
+                  promise.complete(false);
+                  return;
+                }
+                promise.complete(true);
+              })
+              .onFailure(err -> {
+                System.err.println("Error while verifying email: " + err.getMessage());
+                promise.fail(err);
+              });
+        })
+        .onFailure(err -> {
+          System.err.println("Error while verifying email: " + err.getMessage());
+          promise.fail(err);
+        });
+
+    return promise.future();
+  }
 
   public void invalidateSession(Cookie sessionCookie) {
     String sessionToken = sessionCookie.getValue();

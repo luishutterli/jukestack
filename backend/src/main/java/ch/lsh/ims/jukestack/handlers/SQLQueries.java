@@ -35,7 +35,7 @@ public final class SQLQueries {
      * @see UserHandler#getUserInfo(io.vertx.ext.web.RoutingContext)
      */
     public static final String SELECT_USER_INFO_BY_EMAIL = """
-        select benutzerNachname, benutzerVorname, benutzerIstAdmin 
+        select benutzerNachname, benutzerVorname, benutzerIstAdmin, benutzerEmailVerifiziert 
         from TBenutzer 
         where benutzerEmail = ?
     """;

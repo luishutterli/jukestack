@@ -7,6 +7,8 @@ import ch.lsh.ims.jukestack.Util;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.CookieSameSite;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mail.MailClient;
+import io.vertx.ext.mail.MailMessage;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.sqlclient.Pool;
 import io.vertx.sqlclient.Tuple;
@@ -15,12 +17,13 @@ public class UserHandler {
 
   private final Pool dbPool;
   private final AuthenticationManager authManager;
+  private final MailClient mailClient;
   private final Duration SESSION_DURATION;
 
-
-  public UserHandler(Pool dbPool, AuthenticationManager authManager, Duration sessionDuration) {
+  public UserHandler(Pool dbPool, AuthenticationManager authManager, MailClient client, Duration sessionDuration) {
     this.dbPool = dbPool;
     this.authManager = authManager;
+    this.mailClient = client;
     this.SESSION_DURATION = sessionDuration;
   }
 
@@ -181,10 +184,67 @@ public class UserHandler {
     authManager.validateSession(sessionCookie, false)
         .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
         .onSuccess(benutzerEmail -> {
-            authManager.invalidateSession(sessionCookie);
-            context.getCookie("__session").setMaxAge(0);
-            context.response().removeCookies("__session", true);
-            context.response().setStatusCode(200).end();
+          authManager.invalidateSession(sessionCookie);
+          context.getCookie("__session").setMaxAge(0);
+          context.response().removeCookies("__session", true);
+          context.response().setStatusCode(200).end();
+        });
+  }
+
+  public void sendVerifyMail(RoutingContext context) {
+    Cookie sessionCookie = context.request().getCookie("__session");
+
+    authManager.validateSession(sessionCookie, false)
+        .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
+        .onSuccess(benutzerEmail -> {
+          dbPool.preparedQuery(SQLQueries.SELECT_USER_INFO_BY_EMAIL)
+              .execute(Tuple.of(benutzerEmail))
+              .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
+              .onSuccess(res -> {
+                if (res.size() == 0) {
+                  context.response().setStatusCode(500).end("Internal server error");
+                  return;
+                }
+
+                String benutzerVorname = res.iterator().next().getString("benutzerVorname");
+                String benutzerNachname = res.iterator().next().getString("benutzerNachname");
+                boolean benutzerEmailVerifiziert = res.iterator().next().getBoolean("benutzerEmailVerifiziert");
+
+                if (benutzerEmailVerifiziert) {
+                  context.response().setStatusCode(400).end("Email already verified");
+                  return;
+                }
+
+                authManager.generateAndSaveEmailVerifyToken(benutzerEmail)
+                    .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
+                    .onComplete((verifyToken) -> {
+                      String verifyUrl = "https://jukestack.ch/api/auth/verifyEmail?token=" + verifyToken.result();
+                      String mailContent = Util.generateValidationMail(benutzerVorname, benutzerNachname, verifyUrl);
+                      mailClient.sendMail(new MailMessage()
+                          .setFrom("noreply@jukestack.ch")
+                          .setTo(benutzerEmail)
+                          .setSubject("Jukestack Email Verification")
+                          .setHtml(mailContent))
+                          .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
+                          .onSuccess(res2 -> context.response().setStatusCode(200).end());
+                    });
+              });
+        });
+  }
+
+  public void verifyEmail(RoutingContext context) {
+    String token = context.request().getParam("token");
+    System.out.println("Verify email token: " + token);
+
+    if (token == null) {
+      context.response().setStatusCode(400).end("Invalid input");
+      return;
+    }
+
+    authManager.verifyEmail(token)
+        .onFailure(err -> context.response().setStatusCode(400).end("Invalid token"))
+        .onSuccess(benutzerEmail -> {
+          context.response().putHeader("Location", "https://jukestack.ch/app/").setStatusCode(302).end();
         });
   }
 

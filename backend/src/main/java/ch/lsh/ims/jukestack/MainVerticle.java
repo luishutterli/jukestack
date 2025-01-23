@@ -13,6 +13,9 @@ import io.github.cdimascio.dotenv.Dotenv;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.ext.mail.MailClient;
+import io.vertx.ext.mail.MailConfig;
+import io.vertx.ext.mail.StartTLSOptions;
 import io.vertx.ext.web.Router;
 import io.vertx.mysqlclient.MySQLConnectOptions;
 import io.vertx.sqlclient.Pool;
@@ -49,6 +52,14 @@ public class MainVerticle extends AbstractVerticle {
     PoolOptions poolOptions = new PoolOptions().setMaxSize(2);
 
     dbPool = Pool.pool(vertx, connectOptions, poolOptions);
+
+    // Mail Client
+    String mailUser = "noreply@jukestack.ch";
+    String mailPassword = dotenv.get("MAIL_PASSWORD");
+    MailConfig mailConfig = new MailConfig().setHostname("smtp.zoho.eu").setPort(587)
+        .setStarttls(StartTLSOptions.REQUIRED)
+        .setUsername(mailUser).setPassword(mailPassword);
+    MailClient mailClient = MailClient.createShared(vertx, mailConfig);
 
     // Cloudflare R2 Storage
     String r2AccountId = dotenv.get("R2_ACCOUNT_ID");
@@ -89,7 +100,7 @@ public class MainVerticle extends AbstractVerticle {
     router.get(API_BASE + "/ping").handler(ctx -> ctx.response().end("Pong!"));
 
     // /api/user
-    UserHandler userHandler = new UserHandler(dbPool, authManager, Duration.ofMinutes(30));
+    UserHandler userHandler = new UserHandler(dbPool, authManager, mailClient, Duration.ofMinutes(30));
     router.post(USER_ROUTE).handler(userHandler::createUser); // Create user
     router.get(USER_ROUTE).handler(userHandler::getUserInfo); // Get user info
     router.put(USER_ROUTE).handler(null); // Update user info
@@ -100,6 +111,8 @@ public class MainVerticle extends AbstractVerticle {
     router.post(AUTH_ROUTE + "/logout").handler(userHandler::logout); // Logout
     router.get(AUTH_ROUTE + "/verify").handler(userHandler::verifyToken); // Verify session
     router.post(AUTH_ROUTE + "/refresh").handler(userHandler::refresh); // Refresh session
+    router.post(AUTH_ROUTE + "/sendVerify").handler(userHandler::sendVerifyMail); // Send verification mail
+    router.get(AUTH_ROUTE + "/verifyEmail").handler(userHandler::verifyEmail); // Verify email
 
     // /api/songs
     SongHandler songHandler = new SongHandler(dbPool, authManager, r2Client, 5, 1);

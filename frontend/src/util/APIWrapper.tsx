@@ -15,7 +15,7 @@ import axios from "axios";
 
 const publicInstance = axios.create({
     baseURL: baseURL,
-    timeout: 5000,
+    timeout: 10000,
     withCredentials: true,
     headers: { "Content-Type": "application/json" },
 });
@@ -26,6 +26,7 @@ export interface User {
     vorname: string;
     passwort?: string;
     admin?: boolean;
+    emailVerifiziert?: boolean;
 }
 
 export interface Song {
@@ -116,6 +117,15 @@ export async function deleteUser(): Promise<ApiResponse> {
 }
 
 // /auth
+export async function sendVerifyEmail(): Promise<ApiResponse> {
+    try {
+        const response = await publicInstance.post(`${authURL}/sendVerify`);
+        return { success: response.status === 200 };
+    } catch (error) {
+        return handleAxiosError(error);
+    }
+}
+
 export async function login(email: string, passwort: string): Promise<ApiResponse> {
     try {
         const response = await publicInstance.post(`${authURL}/login`, { email, passwort });

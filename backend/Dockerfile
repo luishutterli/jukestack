@@ -12,7 +12,7 @@ RUN mvn package -DskipTests
 # Stage 2: run
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-
+COPY verify-mail.html .
 COPY --from=builder /app/target/*-fat.jar backend.jar
 
 EXPOSE 8080
