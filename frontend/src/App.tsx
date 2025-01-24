@@ -185,7 +185,7 @@ function App() {
     }
 
     return (
-        <div className="relative min-h-screen bg-gradient-to-b from-background to-blue-300 pb-52 md:pb-0">
+        <div className="relative min-h-screen bg-gradient-to-b from-background to-blue-300 pb-52">
             <div className={loading ? "filter grayscale" : ""}>
                 <Header user={userInfo} />
                 <main className="flex flex-col md:flex-row p-2 md:p-8 space-y-4 md:space-x-8 md:space-y-0">

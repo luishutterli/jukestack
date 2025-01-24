@@ -28,14 +28,11 @@ function Header({ user, sticky = false }: { readonly user?: User; readonly stick
                     </button>
                     {dropdownVisible && (
                         <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg">
-                            {/* <Link
-                                to="/app/"
+                            <Link
+                                to="/app/settings"
                                 className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150">
-                                <FaCog className="mr-2" /> Settings
-                            </Link> */}
-							<div className="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150">
-								<FaCog className="mr-2" /> Settings
-							</div>
+                                <FaCog className="mr-2" /> Einstellungen
+                            </Link>
                             <button
                                 type="button"
                                 className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 transition duration-150"
