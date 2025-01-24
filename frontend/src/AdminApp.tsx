@@ -62,7 +62,7 @@ export function AdminApp() {
                     return;
                 }
                 setUserInfo(apiResponse.data);
-                console.log("User info: ", apiResponse.data);
+                // console.log("User info: ", apiResponse.data);
                 if (!apiResponse.data?.admin) {
                     navigate("/app/");
                 }
@@ -76,11 +76,11 @@ export function AdminApp() {
         adminListAllUsers().then((apiResponse) => {
             if (apiResponse.success) {
                 if (apiResponse.data === undefined) {
-                    console.log("No users ", apiResponse.error);
+                    // console.log("No users ", apiResponse.error);
                     return;
                 }
                 setUserList(apiResponse.data);
-                console.log("Loaded users ");
+                // console.log("Loaded users ");
                 setLoading(false);
             } else {
                 setErrorMessage(`Fehler beim Laden der Benutzer: ${apiResponse.error}`);
@@ -214,7 +214,7 @@ export function AdminUserLends() {
                     return;
                 }
                 setUserInfo(apiResponse.data);
-                console.log("User info: ", apiResponse.data);
+                // console.log("User info: ", apiResponse.data);
                 if (!apiResponse.data?.admin) {
                     navigate("/app/");
                 }

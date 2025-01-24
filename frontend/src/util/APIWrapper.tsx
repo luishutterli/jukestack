@@ -1,7 +1,7 @@
 const currentDomain = window.location.hostname;
 const port = window.location.protocol === "http:" ? "8080" : "443";
 const baseURL = `${window.location.protocol}//${currentDomain}:${port}/api`;
-console.log(`API base url: ${baseURL}`);
+// console.log(`API base url: ${baseURL}`);
 
 export const coverBaseUrl = "https://r2-images.jukestack.ch";
 

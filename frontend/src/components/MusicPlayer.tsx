@@ -95,7 +95,7 @@ function MusicPlayer({ song, isPlaying, songUrl, togglePlay }: MusicPlayerProps)
         if (audioRef.current) {
             const diff = audioRef.current.currentTime - currentTime;
             if (audioRef.current.currentTime >= audioRef.current.duration && isPlaying) {
-                console.log("Song ended");
+                // console.log("Song ended");
                 togglePlay();
             }
             if (diff > 0.5) {

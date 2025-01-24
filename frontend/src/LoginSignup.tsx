@@ -43,7 +43,7 @@ function LoginSignup() {
 
         if (isLogin) {
             await login(email, passwort).then((response) => {
-                console.log(response);
+                // console.log(response);
                 if (!response.success) {
                     setIsError(true);
                     setMessage(`Login fehlgeschlagen: ${response.error}`);
@@ -63,7 +63,7 @@ function LoginSignup() {
             passwort,
         };
         await createUser(user).then((response) => {
-            console.log(response);
+            // console.log(response);
             if (!response.success) {
                 setMessage(`Registrierung fehlgeschlagen: ${response.error}`);
                 setIsError(true);

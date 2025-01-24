@@ -69,7 +69,7 @@ function Landing() {
 
         if (!canvasReady) {
             setCanvasReady(true);
-            console.log("canvas ready, ", latest);
+            // console.log("canvas ready, ", latest);
         }
 
         if (scrollDownRef.current) {

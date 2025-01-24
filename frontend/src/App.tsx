@@ -42,7 +42,7 @@ function App() {
                     return;
                 }
                 setUserInfo(apiResponse.data);
-                console.log("User info: ", apiResponse.data);
+                // console.log("User info: ", apiResponse.data);
                 if (apiResponse.data?.admin) {
                     navigate("/app/admin");
                 }
@@ -51,31 +51,33 @@ function App() {
             .catch(() => navigate("/app/login"));
     }, [navigate]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: key is used to refresh the list
     useEffect(() => {
         setLoading(true);
         listSongs().then((apiResponse) => {
             if (apiResponse.success) {
                 if (apiResponse.data === undefined) {
-                    console.log("Keine Lieder ", apiResponse.error);
+                    // console.log("Keine Lieder ", apiResponse.error);
                     return;
                 }
                 setJkLibrary(apiResponse.data);
-                console.log("JK-Bibliothek geladen ", refreshKey);
+                // console.log("JK-Bibliothek geladen ", refreshKey);
                 setLoading(false);
             }
         });
     }, [refreshKey]);
 
+    // biome-ignore lint/correctness/useExhaustiveDependencies: key is used to refresh the list
     useEffect(() => {
         setLoading(true);
         listBorrowedSongs().then((apiResponse) => {
             if (apiResponse.success) {
                 if (apiResponse.data === undefined) {
-                    console.log("Keine ausgeliehenen Lieder ", apiResponse.error);
+                    // console.log("Keine ausgeliehenen Lieder ", apiResponse.error);
                     return;
                 }
                 setOwnLibrary(apiResponse.data);
-                console.log("Eigene Bibliothek geladen ", refreshKey);
+                // console.log("Eigene Bibliothek geladen ", refreshKey);
                 setLoading(false);
             }
         });
@@ -121,23 +123,23 @@ function App() {
             .then((apiResponse) => {
                 if (apiResponse.success) {
                     if (!apiResponse.data || !apiResponse.data.link) {
-                        console.log("Kein Lied-Datei-Link");
+                        // console.log("Kein Lied-Datei-Link");
                         setLoading(false);
                         return;
                     }
 
-                    console.log("Lied wird abgespielt, ", songId);
-                    console.log("Lied wird abgespielt, ", ownLibrary);
-                    console.log(
-                        "Lied wird abgespielt, ",
-                        ownLibrary.find((lend) => lend.song.id === songId),
-                    );
+                    // console.log("Lied wird abgespielt, ", songId);
+                    // console.log("Lied wird abgespielt, ", ownLibrary);
+                    // console.log(
+                    //     "Lied wird abgespielt, ",
+                    //     ownLibrary.find((lend) => lend.song.id === songId),
+                    // );
 
                     setSelectedSong(ownLibrary.find((lend) => lend.song.id === songId)?.song ?? null);
                     setSongUrl(apiResponse.data.link);
                     setPlaying(true);
                     setLoading(false);
-                    console.log("Lied wird abgespielt, ", selectedSong);
+                    // console.log("Lied wird abgespielt, ", selectedSong);
                 } else {
                     setErrorMessage(`Lied konnte nicht abgespielt werden: ${apiResponse.error}`);
                     setLoading(false);
@@ -153,7 +155,7 @@ function App() {
         setLoading(true);
         sendVerifyEmail()
             .then((apiResponse) => {
-                console.log("Verifizierungsmail:", apiResponse)
+                // console.log("Verifizierungsmail:", apiResponse)
                 if (!apiResponse.success) {
                     setErrorMessage(`Verifizierungs-E-Mail konnte nicht gesendet werden: ${apiResponse.error}`);
                 }
