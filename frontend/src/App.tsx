@@ -56,11 +56,11 @@ function App() {
         listSongs().then((apiResponse) => {
             if (apiResponse.success) {
                 if (apiResponse.data === undefined) {
-                    console.log("No songs ", apiResponse.error);
+                    console.log("Keine Lieder ", apiResponse.error);
                     return;
                 }
                 setJkLibrary(apiResponse.data);
-                console.log("Loaded jkLibrary ", refreshKey);
+                console.log("JK-Bibliothek geladen ", refreshKey);
                 setLoading(false);
             }
         });
@@ -71,11 +71,11 @@ function App() {
         listBorrowedSongs().then((apiResponse) => {
             if (apiResponse.success) {
                 if (apiResponse.data === undefined) {
-                    console.log("No borrowed songs ", apiResponse.error);
+                    console.log("Keine ausgeliehenen Lieder ", apiResponse.error);
                     return;
                 }
                 setOwnLibrary(apiResponse.data);
-                console.log("Loaded ownLibrary ", refreshKey);
+                console.log("Eigene Bibliothek geladen ", refreshKey);
                 setLoading(false);
             }
         });
@@ -88,12 +88,12 @@ function App() {
                 if (apiResponse.success) {
                     setRefreshKey((prev) => prev + 1);
                 } else {
-                    setErrorMessage(`Song konnte nicht ausgeliehen werden: ${apiResponse.error}`);
+                    setErrorMessage(`Lied konnte nicht ausgeliehen werden: ${apiResponse.error}`);
                     setLoading(false);
                 }
             })
             .catch(() => {
-                setErrorMessage("Error lending song");
+                setErrorMessage("Fehler beim Ausleihen des Liedes");
                 setLoading(false);
             });
     };
@@ -105,12 +105,12 @@ function App() {
                 if (apiResponse.success) {
                     setRefreshKey((prev) => prev + 1);
                 } else {
-                    setErrorMessage(`Song konnte nicht zurückgegeben werden: ${apiResponse.error}`);
+                    setErrorMessage(`Lied konnte nicht zurückgegeben werden: ${apiResponse.error}`);
                     setLoading(false);
                 }
             })
             .catch(() => {
-                setErrorMessage("Error returning song");
+                setErrorMessage("Fehler beim Zurückgeben des Liedes");
                 setLoading(false);
             });
     };
@@ -121,15 +121,15 @@ function App() {
             .then((apiResponse) => {
                 if (apiResponse.success) {
                     if (!apiResponse.data || !apiResponse.data.link) {
-                        console.log("No song file link");
+                        console.log("Kein Lied-Datei-Link");
                         setLoading(false);
                         return;
                     }
 
-                    console.log("Playing song, ", songId);
-                    console.log("Playing song, ", ownLibrary);
+                    console.log("Lied wird abgespielt, ", songId);
+                    console.log("Lied wird abgespielt, ", ownLibrary);
                     console.log(
-                        "Playing song, ",
+                        "Lied wird abgespielt, ",
                         ownLibrary.find((lend) => lend.song.id === songId),
                     );
 
@@ -137,14 +137,14 @@ function App() {
                     setSongUrl(apiResponse.data.link);
                     setPlaying(true);
                     setLoading(false);
-                    console.log("Playing song, ", selectedSong);
+                    console.log("Lied wird abgespielt, ", selectedSong);
                 } else {
-                    setErrorMessage(`Song konnte nicht abgespielt werden: ${apiResponse.error}`);
+                    setErrorMessage(`Lied konnte nicht abgespielt werden: ${apiResponse.error}`);
                     setLoading(false);
                 }
             })
             .catch(() => {
-                setErrorMessage("Error playing song");
+                setErrorMessage("Fehler beim Abspielen des Liedes");
                 setLoading(false);
             });
     };
@@ -153,15 +153,14 @@ function App() {
         setLoading(true);
         sendVerifyEmail()
             .then((apiResponse) => {
-                if (apiResponse.success) {
-                    setErrorMessage("Verifizierungs-E-Mail wurde gesendet.");
-                } else {
+                console.log("Verifizierungsmail:", apiResponse)
+                if (!apiResponse.success) {
                     setErrorMessage(`Verifizierungs-E-Mail konnte nicht gesendet werden: ${apiResponse.error}`);
                 }
                 setLoading(false);
             })
-            .catch(() => {
-                setErrorMessage("Error sending verification email");
+            .catch((apiResponse) => {
+                setErrorMessage(`Fehler beim Senden der Verifizierungs-E-Mail, ${apiResponse.error}`);
                 setLoading(false);
             });
     };

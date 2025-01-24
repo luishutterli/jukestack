@@ -248,68 +248,73 @@ public class UserHandler {
         });
   }
 
-  // {
-  // "field": "email" | "nachname" | "vorname" | "passwort",
-  // "value": "new value"
-  // }
-  // public void updateUserInfo(RoutingContext context) {
-  // JsonObject reqBody = context.body().asJsonObject();
-  // if (reqBody == null) {
-  // context.response().setStatusCode(400).end("Invalid input");
-  // return;
-  // }
+  public void updateUserInfo(RoutingContext context) {
+    JsonObject reqBody = context.body().asJsonObject();
+    if (reqBody == null) {
+      context.response().setStatusCode(400).end("Invalid input");
+      return;
+    }
 
-  // String field = reqBody.getString("field").toLowerCase();
-  // String value = reqBody.getString("value");
+    String field = reqBody.getString("field").toLowerCase();
+    JsonObject value = reqBody.getJsonObject("value");
 
-  // if (field == null || value == null) {
-  // context.response().setStatusCode(400).end("Invalid input");
-  // return;
-  // }
+    if (field == null || value == null) {
+      context.response().setStatusCode(400).end("Invalid input");
+      return;
+    }
 
-  // if (!field.equals("email") && !field.equals("nachname") &&
-  // !field.equals("vorname")
-  // && !field.equals("passwort")) {
-  // context.response().setStatusCode(400).end("Invalid input");
-  // return;
-  // }
+    if (!field.equals("email") && !field.equals("name") && !field.equals("passwort")) {
+      context.response().setStatusCode(400).end("Invalid input");
+      return;
+    }
 
-  // if (field.equals("email")) {
-  // if (!value.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-  // context.response().setStatusCode(400).end("Email not valid");
-  // return;
-  // }
+    Cookie sessionCookie = context.request().getCookie("__session");
 
-  // if (value.length() > 255) {
-  // context.response().setStatusCode(400).end("Invalid input, email too long");
-  // return;
-  // }
-  // } else if (field.equals("nachname") && value.length() > 45) {
-  // context.response().setStatusCode(400).end("Invalid input, nachname too
-  // long");
-  // return;
-  // } else if (field.equals("vorname") && value.length() > 45) {
-  // context.response().setStatusCode(400).end("Invalid input, vorname too long");
-  // return;
-  // }
+    authManager.validateSession(sessionCookie, true)
+        .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
+        .onSuccess(benutzerEmail -> {
+          if (field.equals("email")) {
+            String email = value.getString("email").toLowerCase().trim();
+            if (email == null || !email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")
+                || email.length() > 255) {
+              context.response().setStatusCode(400).end("Invalid email");
+              return;
+            }
 
-  // Cookie sessionCookie = context.request().getCookie("__session");
+            dbPool.preparedQuery("UPDATE TBenutzer SET benutzerEmail = ?, benutzerEmailVerifiziert = false WHERE benutzerEmail = ?")
+                .execute(Tuple.of(email, benutzerEmail))
+                .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
+                .onSuccess(res -> context.response().setStatusCode(200).end());
+          } else if (field.equals("name")) {
+            String vorname = value.getString("vorname");
+            String nachname = value.getString("nachname");
 
-  // authManager.validateSession(sessionCookie)
-  // .onFailure(err -> context.response().setStatusCode(401).end("Unauthorized"))
-  // .onSuccess(benutzerId -> {
-  // if (field.equals("passwort")) {
-  // String[] hashData = authManager.hashPassword(value);
+            if (vorname == null || nachname == null || vorname.length() > 45 || nachname.length() > 45) {
+              context.response().setStatusCode(400).end("Invalid name");
+              return;
+            }
 
-  // dbPool.preparedQuery("update TBenutzer set benutzerPWHash = $1,
-  // benutzerPWSalt = $2 where benutzerEmail = $3")
-  // .execute(Tuple.of(hashData[1], hashData[0], benutzerId))
-  // .onFailure(err -> context.response().setStatusCode(500).end("Internal server
-  // error"))
-  // .onSuccess(res -> context.response().setStatusCode(200).end());
-  // } else {
+            dbPool
+                .preparedQuery("UPDATE TBenutzer SET benutzerVorname = ?, benutzerNachname = ? WHERE benutzerEmail = ?")
+                .execute(Tuple.of(vorname, nachname, benutzerEmail))
+                .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
+                .onSuccess(res -> context.response().setStatusCode(200).end());
+          } else if (field.equals("passwort")) {
+            String passwort = value.getString("passwort");
 
-  // });
-  // }
+            if (passwort == null) {
+              context.response().setStatusCode(400).end("Invalid password");
+              return;
+            }
+
+            String[] hashData = authManager.hashPassword(passwort);
+
+            dbPool.preparedQuery("UPDATE TBenutzer SET benutzerPWHash = ?, benutzerPWSalt = ? WHERE benutzerEmail = ?")
+                .execute(Tuple.of(hashData[1], hashData[0], benutzerEmail))
+                .onFailure(err -> context.response().setStatusCode(500).end("Internal server error"))
+                .onSuccess(res -> context.response().setStatusCode(200).end());
+          }
+        });
+  }
 
 }

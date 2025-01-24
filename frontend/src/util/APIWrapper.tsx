@@ -98,9 +98,9 @@ export async function getUserInfo(): Promise<ApiResponse<User>> {
     }
 }
 
-export async function updateUserInfo(updatedData: Partial<User>): Promise<ApiResponse> {
+export async function updateUserInfo(field: "email" | "name" | "passwort", value: Partial<User>): Promise<ApiResponse> {
     try {
-        const response = await publicInstance.put(userURL, updatedData);
+        const response = await publicInstance.put(userURL, { field, value });
         return { success: response.status === 200 };
     } catch (error) {
         return handleAxiosError(error);
