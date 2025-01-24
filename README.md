@@ -63,3 +63,10 @@ firebase deploy --only hosting
 # Caching
 The cover images are cached client-side using the `Cache-Control` header. The cache is set to 1 month. <br>
 The header is set using a custom Cloudflare Caching rule which caches everything matching this pattern: `https://r2-images.jukestack.ch/*`
+
+# Work
+Author: Luis Hutterli, IMS Kantonsschule Frauenfeld <br>
+Subject: IDat M106 <br>
+
+## Time Spent (Tracked with Hackclub's WakaTime)
+![Waka Screenshot](https://r2-images.jukestack.ch/waka-screenshot.png)
