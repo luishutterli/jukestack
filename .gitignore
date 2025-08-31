@@ -6,3 +6,5 @@
 
 */*.blend1
 .firebase/hosting.ZnJvbnRlbmQvZGlzdA.cache
+
+.env

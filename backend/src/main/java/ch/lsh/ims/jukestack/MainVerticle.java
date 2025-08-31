@@ -39,13 +39,16 @@ public class MainVerticle extends AbstractVerticle {
     // MySQL Connection
     Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
 
+    String dbHost = dotenv.get("DB_HOST", "i-kf.ch");
+    String dbPort = dotenv.get("DB_PORT", "3316");
     String dbUser = dotenv.get("DB_USER");
     String dbPassword = dotenv.get("DB_PASSWORD");
+    String dbName = dotenv.get("DB_NAME", "JukeStackDB_Luis");
 
     MySQLConnectOptions connectOptions = new MySQLConnectOptions()
-        .setPort(3316)
-        .setHost("i-kf.ch")
-        .setDatabase("JukeStackDB_Luis")
+        .setPort(Integer.parseInt(dbPort))
+        .setHost(dbHost)
+        .setDatabase(dbName)
         .setUser(dbUser)
         .setPassword(dbPassword);
 

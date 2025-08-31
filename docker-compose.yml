@@ -1,0 +1,33 @@
+services:
+  mysql:
+    image: mysql:latest
+    container_name: jukestack_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${DB_NAME:-JukeStackDB_Luis}
+      MYSQL_USER: ${DB_USER:-jukestack_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-jukestack_password}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  backend:
+    build: ./backend
+    container_name: jukestack_backend
+    environment:
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-JukeStackDB_Luis}
+      DB_USER: ${DB_USER:-jukestack_user}
+      DB_PASSWORD: ${DB_PASSWORD:-jukestack_password}
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql_data:
+    driver: local

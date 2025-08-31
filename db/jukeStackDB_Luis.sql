@@ -26,6 +26,7 @@
 -- -----------------------------------------------------
 -- Schema JukeStackDB_Luis
 -- -----------------------------------------------------
+ALTER DATABASE JukeStackDB_Luis DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE JukeStackDB_Luis ;
 
 -- -----------------------------------------------------
@@ -42,7 +43,8 @@ CREATE TABLE TBenutzer (
   benutzerIstAdmin BOOLEAN NOT NULL DEFAULT FALSE,
   benutzerEmailVerifiziert BOOLEAN NOT NULL DEFAULT FALSE,
   PRIMARY KEY (benutzerEmail))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- -----------------------------------------------------
@@ -55,7 +57,8 @@ CREATE TABLE TEmailVerifizierungen (
   benutzerEmail VARCHAR(255) NOT NULL,
   verifizierungErstellt TIMESTAMP NOT NULL,
   PRIMARY KEY (verifizierungId))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- -----------------------------------------------------
@@ -72,7 +75,8 @@ CREATE TABLE TSongs (
   songMP3Objekt VARCHAR(255) NOT NULL,
   songCoverObjekt VARCHAR(255) NULL,
   PRIMARY KEY (songId))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- -----------------------------------------------------
@@ -87,7 +91,8 @@ CREATE TABLE TAusleihen (
   benutzerEmail VARCHAR(255) NOT NULL,
   songId INT UNSIGNED NOT NULL,
   PRIMARY KEY (ausleihId))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- -----------------------------------------------------
@@ -99,7 +104,8 @@ CREATE TABLE TMusiker (
   musikerId INT UNSIGNED NOT NULL AUTO_INCREMENT,
   musikerName VARCHAR(100) NOT NULL,
   PRIMARY KEY (musikerId))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- -----------------------------------------------------
@@ -111,7 +117,8 @@ CREATE TABLE TBeitraege (
   musikerId INT UNSIGNED NOT NULL,
   songId INT UNSIGNED NOT NULL,
   PRIMARY KEY (musikerId, songId))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- -----------------------------------------------------
@@ -127,7 +134,8 @@ CREATE TABLE TAuthSessions (
   sessUserAgent VARCHAR(255) NOT NULL,
   benutzerEmail VARCHAR(255) NOT NULL,
   PRIMARY KEY (sessToken))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 
 -- -----------------------------------------------------
@@ -139,4 +147,5 @@ CREATE TABLE TConfigs (
   configKey VARCHAR(45) NOT NULL,
   configValue VARCHAR(255) NOT NULL,
   PRIMARY KEY (configKey))
-ENGINE = InnoDB;
+ENGINE = InnoDB
+DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
